@@ -1,37 +1,37 @@
 class SigninModel {
   String message;
   String token;
-  Data data;
+  User user;
 
-  SigninModel({required this.message, required this.token, required this.data});
+  SigninModel({required this.message, required this.token, required this.user});
 
   factory SigninModel.fromJson(Map<String, dynamic> json) => SigninModel(
     message: json["message"],
     token: json["token"],
-    data: Data.fromJson(json["data"]),
+    user: User.fromJson(json["data"]),
   );
 
   Map<String, dynamic> toJson() => {
     "message": message,
     "token": token,
-    "data": data.toJson(),
+    "data": user.toJson(),
   };
 }
 
-class Data {
+class User {
   String id;
   String fullName;
   String email;
   String role;
 
-  Data({
+  User({
     required this.id,
     required this.fullName,
     required this.email,
     required this.role,
   });
 
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
+  factory User.fromJson(Map<String, dynamic> json) => User(
     id: json["id"],
     fullName: json["full_name"],
     email: json["email"],

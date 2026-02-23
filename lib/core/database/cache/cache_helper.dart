@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CacheHelper {
@@ -17,6 +18,7 @@ class CacheHelper {
     } else if (value is double) {
       return await sharedPreferences.setDouble(key, value);
     } else {
+      debugPrint(value.runtimeType.toString());
       throw ('Unsupported value type');
     }
   }

@@ -1,3 +1,4 @@
+import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/errors/error_model.dart';
 import 'package:dio/dio.dart';
 
@@ -26,21 +27,61 @@ void handleDioException(DioException e) {
     case DioExceptionType.badResponse:
       switch (e.response?.statusCode) {
         case 400: // Bad Request
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: 400,
+            }),
+          );
         case 401: // Unauthorized
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: 401,
+            }),
+          );
         case 403: // Forbidden
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: 403,
+            }),
+          );
         case 404: // Not Found
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: 404,
+            }),
+          );
         case 409: // Conflict
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: 409,
+            }),
+          );
         case 422: // Unprocessable Entity
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: 422,
+            }),
+          );
         case 504: // Gateway Timeout
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: 504,
+            }),
+          );
         default:
-          throw ServerException(ErrorModel.fromJson(e.response!.data));
+          throw ServerException(
+            ErrorModel.fromJson({
+              APIKeys.message: e.response!.data['error'],
+              APIKeys.status: e.response!.statusCode!,
+            }),
+          );
       }
   }
 }
