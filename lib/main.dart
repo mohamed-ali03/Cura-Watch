@@ -4,7 +4,7 @@ import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/features/auth/presentation/auth_route.dart';
 import 'package:cura_watch/features/auth/presentation/on_boarding.dart';
-import 'package:cura_watch/home_screen.dart';
+import 'package:cura_watch/features/user/home_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() async {

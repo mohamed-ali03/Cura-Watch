@@ -4,7 +4,7 @@ import 'package:cura_watch/core/widgets/my_button.dart';
 import 'package:cura_watch/core/widgets/my_text_field.dart';
 import 'package:cura_watch/features/auth/bloc/auth_bloc_bloc.dart';
 import 'package:cura_watch/features/auth/presentation/forget_password_screen.dart';
-import 'package:cura_watch/home_screen.dart';
+import 'package:cura_watch/features/user/home_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
