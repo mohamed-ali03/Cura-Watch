@@ -33,9 +33,12 @@ class _SignInScreenState extends State<SignInScreen> {
             (route) => false,
           );
         } else if (state is AuthBlocError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message!)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message!),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       },
       child: Scaffold(

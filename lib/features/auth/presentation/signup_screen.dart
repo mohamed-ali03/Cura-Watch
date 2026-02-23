@@ -34,9 +34,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       listener: (context, state) {
         if (state is AuthBlocSuccess || state is AuthBlocError) {
           if (state.message != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message!)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message!),
+                backgroundColor: state is AuthBlocSuccess
+                    ? Colors.green
+                    : Colors.red,
+              ),
+            );
           }
         }
       },
