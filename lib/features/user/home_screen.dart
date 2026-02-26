@@ -1,8 +1,8 @@
-import 'package:cura_watch/core/api/dio_consumer.dart';
-import 'package:cura_watch/features/auth/bloc/auth_bloc_bloc.dart';
-import 'package:dio/dio.dart';
+import 'package:cura_watch/core/api/end_points.dart';
+import 'package:cura_watch/core/database/cache/cache_helper.dart';
+import 'package:cura_watch/core/services/service_locator.dart';
+import 'package:cura_watch/features/auth/presentation/auth_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,29 +14,24 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBlocBloc>(
-      create: (context) => AuthBlocBloc(DioConsumer(Dio())),
-      child: BlocConsumer<AuthBlocBloc, AuthBlocState>(
-        listener: (context, state) {
-          if (state is AuthBlocSuccess) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          }
-        },
-        builder: (context, state) {
-          return Scaffold(
-            appBar: AppBar(
-              actions: [
-                IconButton(
-                  onPressed: () =>
-                      context.read<AuthBlocBloc>().add(AuthLogOut()),
-                  icon: Icon(Icons.logout),
-                ),
-              ],
-            ),
-            body: Center(child: Text('home screen')),
-          );
-        },
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await getIt<CacheHelper>().removeData(key: APIKeys.token);
+              if (context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AuthRoute()),
+                );
+              }
+            },
+            icon: Icon(Icons.logout),
+          ),
+        ],
       ),
+      body: Center(child: Text('home screen')),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/features/auth/presentation/auth_route.dart';
 import 'package:cura_watch/features/auth/presentation/on_boarding.dart';
 import 'package:cura_watch/features/user/home_screen.dart';
+import 'package:cura_watch/features/user/patient/presentation/on_boarding/user_on_boarding.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: getIt<CacheHelper>().getData(key: 'isNotFirstTime') == true
           ? getIt<CacheHelper>().getData(key: APIKeys.token) != null
-                ? HomeScreen()
+                ? UserOnBoarding()
                 : AuthRoute()
           : OnBoarding(),
     );

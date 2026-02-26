@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MyTextField extends StatefulWidget {
   final String hintText;
   final TextEditingController controller;
   final bool isObscure;
   final bool eye;
+  final bool isNumber;
+  final int numberOfRows;
+  final Color? color;
 
   const MyTextField({
     super.key,
@@ -12,6 +16,9 @@ class MyTextField extends StatefulWidget {
     required this.controller,
     this.isObscure = false,
     this.eye = false,
+    this.isNumber = false,
+    this.numberOfRows = 1,
+    this.color,
   });
 
   @override
@@ -36,6 +43,7 @@ class _MyTextFieldState extends State<MyTextField> {
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         hintText: widget.hintText,
+        hintStyle: TextStyle(color: widget.color),
         suffixIcon: eye
             ? IconButton(
                 onPressed: () {
@@ -48,6 +56,11 @@ class _MyTextFieldState extends State<MyTextField> {
             : null,
       ),
       obscureText: isObscure,
+      keyboardType: widget.isNumber ? TextInputType.number : TextInputType.text,
+      inputFormatters: widget.isNumber
+          ? [FilteringTextInputFormatter.digitsOnly]
+          : null,
+      maxLines: widget.numberOfRows,
     );
   }
 }
