@@ -1,7 +1,6 @@
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_button.dart';
-import 'package:cura_watch/core/widgets/my_text.dart';
 import 'package:cura_watch/core/widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -43,10 +42,6 @@ class _OnBoarding1State extends State<OnBoarding1> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // title
-          MyText(text: 'Complete Your Profile'),
-          SizedBox(height: getIt<SizeConfig>().blockHight * 2),
-
           // image
           Image.asset('assets/images/onBoarding_1.jpeg'),
           SizedBox(height: getIt<SizeConfig>().blockHight * 3),

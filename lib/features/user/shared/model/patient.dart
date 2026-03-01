@@ -5,7 +5,7 @@ class Patient {
   String phoneNumber;
   String gender;
   double weight;
-  int height;
+  double height;
   DateTime dateOfBirth;
   String bloodType;
   String assignedDoctorId;
@@ -32,20 +32,22 @@ class Patient {
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) => Patient(
-    fullName: json["full_name"],
-    email: json["email"],
-    password: json["password"],
-    phoneNumber: json["phone_number"],
-    gender: json["gender"],
-    weight: json["weight"]?.toDouble(),
-    height: json["height"],
-    dateOfBirth: DateTime.parse(json["date_of_birth"]),
-    bloodType: json["blood_type"],
-    assignedDoctorId: json["assigned_doctor_id"],
-    chronicDiseases: List<String>.from(json["chronic_diseases"].map((x) => x)),
-    allergies: List<String>.from(json["allergies"].map((x) => x)),
-    medications: json["medications"],
-    emergencyContact: json["emergency_contact"],
+    fullName: json["full_name"] ?? '',
+    email: json["email"] ?? '',
+    password: json["password"] ?? '',
+    phoneNumber: json["phone_number"] ?? '',
+    gender: json["gender"] ?? '',
+    weight: json["weight"]?.toDouble() ?? 0.0,
+    height: json["height"]?.toDouble() ?? 0.0,
+    dateOfBirth: DateTime.parse(json["date_of_birth"] ?? '1900-01-01'),
+    bloodType: json["blood_type"] ?? '',
+    assignedDoctorId: json["assigned_doctor_id"] ?? '',
+    chronicDiseases: List<String>.from(
+      json["chronic_diseases"]?.map((x) => x) ?? [],
+    ),
+    allergies: List<String>.from(json["allergies"]?.map((x) => x) ?? []),
+    medications: json["medications"] ?? {},
+    emergencyContact: json["emergency_contact"] ?? {},
   );
 
   Map<String, dynamic> toJson() => {

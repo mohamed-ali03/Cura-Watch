@@ -1,10 +1,10 @@
-import 'package:cura_watch/core/api/dio_consumer.dart';
-import 'package:cura_watch/features/auth/bloc/auth_bloc_bloc.dart';
+import 'package:cura_watch/core/constants.dart';
+import 'package:cura_watch/features/auth/presentation/forget_password_screen.dart';
+import 'package:cura_watch/features/auth/presentation/reset_password_screen.dart';
 import 'package:cura_watch/features/auth/presentation/signin_screen.dart';
 import 'package:cura_watch/features/auth/presentation/signup_screen.dart';
-import 'package:dio/dio.dart';
+import 'package:cura_watch/features/auth/presentation/verification_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthRoute extends StatefulWidget {
   const AuthRoute({super.key});
@@ -14,21 +14,22 @@ class AuthRoute extends StatefulWidget {
 }
 
 class _AuthRouteState extends State<AuthRoute> {
-  bool goToSignInScreen = true;
+  AuthRouteType currentRoute = AuthRouteType.signIn;
 
-  void toggle() {
+  void route(AuthRouteType nextRoute) {
     setState(() {
-      goToSignInScreen = !goToSignInScreen;
+      currentRoute = nextRoute;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBlocBloc>(
-      create: (context) => AuthBlocBloc(DioConsumer(Dio())),
-      child: goToSignInScreen
-          ? SignInScreen(onTap: toggle)
-          : SignUpScreen(onTap: toggle),
-    );
+    return switch (currentRoute) {
+      AuthRouteType.signIn => SignInScreen(onTap: route),
+      AuthRouteType.signUp => SignUpScreen(onTap: route),
+      AuthRouteType.forgetPassword => ForgetPasswordScreen(onTap: route),
+      AuthRouteType.verification => VerificationScreen(onTap: route),
+      AuthRouteType.resetPassword => ResetPasswordScreen(onTap: route),
+    };
   }
 }

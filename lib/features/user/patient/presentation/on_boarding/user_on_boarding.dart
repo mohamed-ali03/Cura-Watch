@@ -1,11 +1,13 @@
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_button.dart';
+import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding1.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding2.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding3.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding4.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class UserOnBoarding extends StatefulWidget {
@@ -19,7 +21,6 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Shared state for onboarding data
   // on boarding 1
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
@@ -33,8 +34,10 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
 
   // on boarding 3
   final ValueNotifier<List<TextEditingController>> _medicationControllers =
-      ValueNotifier([]);
-  final ValueNotifier<List<TimeOfDay>> _dosageTimes = ValueNotifier([]);
+      ValueNotifier([TextEditingController()]);
+  final ValueNotifier<List<TimeOfDay>> _dosageTimes = ValueNotifier([
+    TimeOfDay(hour: 12, minute: 0),
+  ]);
 
   // on boarding 4
   final TextEditingController _doctorIdController = TextEditingController();
@@ -53,6 +56,7 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
     super.initState();
   }
 
+  // navigate between pages
   void _nextPage() {
     _pageController.nextPage(
       duration: const Duration(milliseconds: 300),
@@ -67,15 +71,74 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
     );
   }
 
-  void _finish() {}
+  Map<String, dynamic> getMedicationMap() {
+    final medications = _medicationControllers.value;
+    final times = _dosageTimes.value;
+
+    final Map<String, dynamic> result = {};
+
+    for (int i = 0; i < medications.length; i++) {
+      final name = medications[i].text.trim();
+      if (name.isNotEmpty) {
+        result[name] = times[i].toString();
+      }
+    }
+    return result;
+  }
+
+  // finish on boarding and send data to server
+  void _finish() {
+    context.read<PatientBloc>().add(
+      EditPatientInfoEvent(
+        gender: _isMale.value ? 'male' : 'female',
+        weight: double.tryParse(_weightController.text) ?? 0.0,
+        height: double.tryParse(_heightController.text) ?? 0.0,
+        dateOfBirth: _selectedDate.value,
+        bloodType: _selectedBloodType.value,
+        chronicDiseases: _selectedDiseases.value,
+        allergies: _allergiesController.text
+            .split(',')
+            .map((e) => e.trim())
+            .toList(),
+        medications: getMedicationMap(),
+
+        assignedDoctorId: _doctorIdController.text,
+        emergencyContact: {
+          _emergencyContacts.value[0]['name']?.text ?? 'Not Defined':
+              _emergencyContacts.value[0]['phone']?.text ?? 'Not Defined',
+        },
+      ),
+    );
+  }
+
+  List<String> titles = [
+    'Complete Your Profile',
+    'Medical Background',
+    'Current Medications',
+    'Emergency Contacts',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(titles[_currentPage]),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: _currentPage == 0 ? null : _previousPage,
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/auth'),
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+        backgroundColor: Colors.white,
+      ),
       body: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: getIt<SizeConfig>().blockHight * 8,
+          vertical: getIt<SizeConfig>().blockHight * 3,
           horizontal: getIt<SizeConfig>().blockWidth * 8,
         ),
         child: Column(
@@ -92,18 +155,15 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
                     selectedDate: _selectedDate,
                   ),
                   HealthInfoWidget(
-                    onBack: _previousPage,
                     selectedBloodType: _selectedBloodType,
                     allergiesController: _allergiesController,
                     selectedDiseases: _selectedDiseases,
                   ),
                   MedicationWidget(
-                    onBack: _previousPage,
                     medicationControllers: _medicationControllers,
                     dosageTimes: _dosageTimes,
                   ),
                   DoctorContactWidget(
-                    onBack: _previousPage,
                     doctorIdController: _doctorIdController,
                     emergencyContacts: _emergencyContacts,
                   ),

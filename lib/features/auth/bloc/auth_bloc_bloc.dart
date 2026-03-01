@@ -11,10 +11,10 @@ import 'package:meta/meta.dart';
 part 'auth_bloc_event.dart';
 part 'auth_bloc_state.dart';
 
-class AuthBlocBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
+class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   final DioConsumer dioConsumer;
 
-  AuthBlocBloc(this.dioConsumer) : super(AuthBlocInitial()) {
+  AuthBloc(this.dioConsumer) : super(AuthBlocInitial()) {
     on<AuthSignIn>(_onSignIn);
     on<AuthSignUp>(_onSingUp);
     on<AuthLogOut>(_onLogOut);
@@ -24,7 +24,6 @@ class AuthBlocBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   Future<void> _onSignIn(AuthSignIn event, Emitter<AuthBlocState> emit) async {
     try {
       emit(AuthBlocLoading());
-      // TODO : hash the password
       String hashpassword = hashPassword(event.password);
       final response = await dioConsumer.post(
         EndPoints.signIn,
@@ -38,6 +37,10 @@ class AuthBlocBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
         key: APIKeys.id,
         value: response[APIKeys.data][APIKeys.id],
       );
+      await getIt<CacheHelper>().saveData(
+        key: APIKeys.role,
+        value: response[APIKeys.data][APIKeys.role],
+      );
       emit(AuthBlocSuccess(user: User.fromJson(response[APIKeys.data])));
     } on ServerException catch (e) {
       emit(AuthBlocError(message: e.errorModel.message));
@@ -49,7 +52,6 @@ class AuthBlocBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   Future<void> _onSingUp(AuthSignUp event, Emitter<AuthBlocState> emit) async {
     try {
       emit(AuthBlocLoading());
-      // TODO : hash the password
       if (event.password != event.confirmedPassword) {
         emit(AuthBlocError(message: 'Passwords do not match'));
         return;
@@ -67,13 +69,7 @@ class AuthBlocBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
           APIKeys.password: hashedPassword,
         },
       );
-      response[APIKeys.data]['role'] = event.role;
-      emit(
-        AuthBlocSuccess(
-          user: User.fromJson(response[APIKeys.data]),
-          message: response[APIKeys.message],
-        ),
-      );
+      emit(AuthBlocSuccess(message: response[APIKeys.message]));
     } on ServerException catch (e) {
       emit(AuthBlocError(message: e.errorModel.message));
     } catch (e) {

@@ -6,6 +6,7 @@ class EndPoints {
   static const String getMe = 'auth/getME';
 
   static const String getPatientInfo = 'patients/profile';
+  static const String getDoctors = 'auth/doctors';
 
   static const String sendVitalInfo = 'patients/vitals';
   static const String getVitalInfo = 'patients/vitals-history';

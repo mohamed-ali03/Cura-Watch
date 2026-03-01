@@ -1,19 +1,14 @@
 import 'package:cura_watch/core/constants.dart';
-import 'package:cura_watch/core/services/service_locator.dart';
-import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_text_field.dart';
-import 'package:cura_watch/features/user/patient/widgets/on_boarding_title.dart';
-import 'package:cura_watch/features/user/patient/widgets/section_header.dart';
+import 'package:cura_watch/features/user/patient/presentation/widgets/section_header.dart';
 import 'package:flutter/material.dart';
 
 class HealthInfoWidget extends StatefulWidget {
-  final VoidCallback? onBack;
   final ValueNotifier<String> selectedBloodType;
   final TextEditingController allergiesController;
   final ValueNotifier<List<String>> selectedDiseases;
   const HealthInfoWidget({
     super.key,
-    this.onBack,
     required this.selectedBloodType,
     required this.allergiesController,
     required this.selectedDiseases,
@@ -31,10 +26,6 @@ class _HealthInfoWidgetState extends State<HealthInfoWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // title
-          OnBoardingTitle(onBack: widget.onBack, title: 'Medical Background'),
-          SizedBox(height: getIt<SizeConfig>().blockHight * 3),
-
           // ── Blood Type ──
           SectionHeader(
             icon: Icons.water_drop,
@@ -130,6 +121,7 @@ class _HealthInfoWidgetState extends State<HealthInfoWidget> {
                 'List any food, drug, or environmental allergies.\n\nType \'None\' if you don\'t have any',
             controller: widget.allergiesController,
             numberOfRows: 5,
+            color: Colors.grey[500],
           ),
         ],
       ),

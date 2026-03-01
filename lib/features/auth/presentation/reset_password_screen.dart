@@ -1,3 +1,4 @@
+import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_button.dart';
@@ -5,7 +6,9 @@ import 'package:cura_watch/core/widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final Function(AuthRouteType) onTap;
+
+  const ResetPasswordScreen({super.key, required this.onTap});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -30,7 +33,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      widget.onTap(AuthRouteType.verification);
                     },
                     icon: Icon(Icons.arrow_back_ios_new),
                   ),
@@ -69,7 +72,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 controller: confirmPasswordController,
               ),
               SizedBox(height: getIt<SizeConfig>().blockHight * 3),
-              MyButton(text: 'Reset Password', onTap: () {}),
+              MyButton(
+                text: 'Reset Password',
+                onTap: () => widget.onTap(AuthRouteType.signIn),
+              ),
             ],
           ),
         ),

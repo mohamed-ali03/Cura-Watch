@@ -12,7 +12,7 @@ class EditPatientInfoEvent extends PatientEvent {
   final String? phoneNumber;
   final String? gender;
   final double? weight;
-  final int? height;
+  final double? height;
   final DateTime? dateOfBirth;
   final String? bloodType;
   final String? assignedDoctorId;
@@ -37,6 +37,8 @@ class EditPatientInfoEvent extends PatientEvent {
     this.emergencyContact,
   });
 }
+
+class GetDoctors extends PatientEvent {}
 
 // Vital Info
 class EditVitalInfoEvent extends PatientEvent {

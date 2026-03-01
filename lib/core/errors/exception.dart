@@ -30,7 +30,7 @@ void handleDioException(DioException e) {
           throw ServerException(
             ErrorModel.fromJson({
               APIKeys.message:
-                  e.response!.data['message'] ?? e.response!.data['error'],
+                  e.response!.data['error'] ?? e.response!.data['message'],
               APIKeys.status: 400,
             }),
           );

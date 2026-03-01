@@ -1,19 +1,14 @@
 import 'package:cura_watch/core/constants.dart';
-import 'package:cura_watch/core/services/service_locator.dart';
-import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_text_field.dart';
-import 'package:cura_watch/features/user/patient/widgets/add_button.dart';
-import 'package:cura_watch/features/user/patient/widgets/on_boarding_title.dart';
-import 'package:cura_watch/features/user/patient/widgets/section_header.dart';
+import 'package:cura_watch/features/user/patient/presentation/widgets/section_header.dart';
+import 'package:cura_watch/features/user/patient/presentation/widgets/add_button.dart';
 import 'package:flutter/material.dart';
 
 class MedicationWidget extends StatefulWidget {
-  final VoidCallback onBack;
   final ValueNotifier<List<TextEditingController>> medicationControllers;
   final ValueNotifier<List<TimeOfDay>> dosageTimes;
   const MedicationWidget({
     super.key,
-    required this.onBack,
     required this.medicationControllers,
     required this.dosageTimes,
   });
@@ -66,24 +61,12 @@ class _MedicationWidgetState extends State<MedicationWidget> {
   }
 
   @override
-  void dispose() {
-    for (final c in widget.medicationControllers.value) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // title
-          OnBoardingTitle(onBack: widget.onBack, title: 'Current Medications'),
-          SizedBox(height: getIt<SizeConfig>().blockHight * 3),
-
           // ── Medication Name Section ──
           SectionHeader(
             icon: Icons.medication,

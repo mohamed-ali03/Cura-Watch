@@ -29,11 +29,13 @@ class DioConsumer implements ApiConsumer {
     bool isFormData = false,
   }) async {
     try {
-      final response = await dio.delete(
-        path,
-        data: isFormData ? FormData.fromMap(data ?? {}) : data,
-        queryParameters: queryParameters,
-      );
+      final response = await dio
+          .delete(
+            path,
+            data: isFormData ? FormData.fromMap(data ?? {}) : data,
+            queryParameters: queryParameters,
+          )
+          .timeout(const Duration(seconds: 30));
       return response.data;
     } on DioException catch (e) {
       handleDioException(e);
@@ -47,12 +49,10 @@ class DioConsumer implements ApiConsumer {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final response = await dio.get(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-      );
-      return response;
+      final response = await dio
+          .get(path, data: data, queryParameters: queryParameters)
+          .timeout(const Duration(seconds: 30));
+      return response.data;
     } on DioException catch (e) {
       handleDioException(e);
     }
@@ -66,12 +66,14 @@ class DioConsumer implements ApiConsumer {
     bool isFormData = false,
   }) async {
     try {
-      final response = await dio.patch(
-        path,
-        data: isFormData ? FormData.fromMap(data ?? {}) : data,
-        queryParameters: queryParameters,
-      );
-      return response;
+      final response = await dio
+          .patch(
+            path,
+            data: isFormData ? FormData.fromMap(data ?? {}) : data,
+            queryParameters: queryParameters,
+          )
+          .timeout(const Duration(seconds: 30));
+      return response.data;
     } on DioException catch (e) {
       handleDioException(e);
     }
@@ -85,11 +87,13 @@ class DioConsumer implements ApiConsumer {
     bool isFormData = false,
   }) async {
     try {
-      final response = await dio.post(
-        path,
-        data: isFormData ? FormData.fromMap(data ?? {}) : data,
-        queryParameters: queryParameters,
-      );
+      final response = await dio
+          .post(
+            path,
+            data: isFormData ? FormData.fromMap(data ?? {}) : data,
+            queryParameters: queryParameters,
+          )
+          .timeout(const Duration(seconds: 30));
       return response.data;
     } on DioException catch (e) {
       handleDioException(e);

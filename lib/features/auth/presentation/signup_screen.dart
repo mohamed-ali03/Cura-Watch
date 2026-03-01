@@ -1,3 +1,4 @@
+import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_button.dart';
@@ -8,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SignUpScreen extends StatefulWidget {
-  final Function() onTap;
+  final Function(AuthRouteType) onTap;
   const SignUpScreen({super.key, required this.onTap});
 
   @override
@@ -30,7 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBlocBloc, AuthBlocState>(
+    return BlocListener<AuthBloc, AuthBlocState>(
       listener: (context, state) {
         if (state is AuthBlocSuccess || state is AuthBlocError) {
           if (state.message != null) {
@@ -131,7 +132,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = widget.onTap,
+                          ..onTap = () => widget.onTap(AuthRouteType.signIn),
                       ),
                     ],
                   ),
@@ -145,14 +146,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildButton() {
-    return BlocBuilder<AuthBlocBloc, AuthBlocState>(
+    return BlocBuilder<AuthBloc, AuthBlocState>(
       builder: (context, state) {
         if (state is AuthBlocLoading) {
           return const Center(child: CircularProgressIndicator());
         } else {
           return MyButton(
             text: 'Sign Up',
-            onTap: () => context.read<AuthBlocBloc>().add(
+            onTap: () => context.read<AuthBloc>().add(
               AuthSignUp(
                 fullName: fullNameController.text,
                 email: emailController.text,

@@ -5,25 +5,54 @@ sealed class PatientState {}
 
 final class PatientInitial extends PatientState {}
 
-final class PatientStateLoading extends PatientState {}
+final class PatientLoading extends PatientState {}
 
-final class PatientStateSuccess extends PatientState {
-  final Patient? patient;
-  final VitalInfo? vitalInfo;
-  final List<VitalInfo>? vitalInfoList;
-
-  final String? message;
-
-  PatientStateSuccess({
-    this.patient,
-    this.vitalInfo,
-    this.message,
-    this.vitalInfoList,
-  });
+final class PatientLoaded extends PatientState {
+  final Patient patient;
+  PatientLoaded({required this.patient});
 }
 
-final class PatientStateError extends PatientState {
+final class PatientLoadingError extends PatientState {
   final String message;
 
-  PatientStateError(this.message);
+  PatientLoadingError({required this.message});
+}
+
+final class DoctorsLoading extends PatientState {}
+
+final class DoctorsLoaded extends PatientState {
+  final List<Doctor> doctors;
+  DoctorsLoaded({required this.doctors});
+}
+
+final class DoctorsLoadingError extends PatientState {
+  final String message;
+
+  DoctorsLoadingError({required this.message});
+}
+
+final class VitalInfoLoading extends PatientState {}
+
+final class VitalInfoLoaded extends PatientState {
+  final VitalInfo vitalInfo;
+  VitalInfoLoaded({required this.vitalInfo});
+}
+
+final class VitalInfoError extends PatientState {
+  final String message;
+
+  VitalInfoError({required this.message});
+}
+
+final class VitalInfoListLoading extends PatientState {}
+
+final class VitalInfoListLoaded extends PatientState {
+  final List<VitalInfo> vitalInfoList;
+  VitalInfoListLoaded({required this.vitalInfoList});
+}
+
+final class VitalInfoListError extends PatientState {
+  final String message;
+
+  VitalInfoListError({required this.message});
 }

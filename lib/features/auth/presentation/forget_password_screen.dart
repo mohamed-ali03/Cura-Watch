@@ -1,12 +1,14 @@
+import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_button.dart';
 import 'package:cura_watch/core/widgets/my_text_field.dart';
-import 'package:cura_watch/features/auth/presentation/verification_screen.dart';
 import 'package:flutter/material.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
-  const ForgetPasswordScreen({super.key});
+  final Function(AuthRouteType) onTap;
+
+  const ForgetPasswordScreen({super.key, required this.onTap});
 
   @override
   State<ForgetPasswordScreen> createState() => _ForgetPasswordScreenState();
@@ -31,7 +33,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 alignment: AlignmentDirectional.topStart,
                 child: IconButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    widget.onTap(AuthRouteType.signIn);
                   },
                   icon: Icon(Icons.arrow_back_ios_new),
                 ),
@@ -66,10 +68,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               SizedBox(height: getIt<SizeConfig>().blockHight * 2),
               MyButton(
                 text: 'Send Code',
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => VerificationScreen()),
-                ),
+                onTap: () => widget.onTap(AuthRouteType.verification),
               ),
             ],
           ),

@@ -1,17 +1,15 @@
+import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_button.dart';
 import 'package:cura_watch/core/widgets/my_text_field.dart';
 import 'package:cura_watch/features/auth/bloc/auth_bloc_bloc.dart';
-import 'package:cura_watch/features/auth/presentation/forget_password_screen.dart';
-import 'package:cura_watch/features/user/home_screen.dart';
-import 'package:cura_watch/features/user/patient/presentation/on_boarding/user_on_boarding.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SignInScreen extends StatefulWidget {
-  final Function() onTap;
+  final Function(AuthRouteType) onTap;
   const SignInScreen({super.key, required this.onTap});
 
   @override
@@ -25,14 +23,10 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBlocBloc, AuthBlocState>(
+    return BlocListener<AuthBloc, AuthBlocState>(
       listener: (context, state) {
         if (state is AuthBlocSuccess) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => UserOnBoarding()),
-            (route) => false,
-          );
+          Navigator.pushNamed(context, '/user');
         } else if (state is AuthBlocError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -75,14 +69,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ForgetPasswordScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: () => widget.onTap(AuthRouteType.forgetPassword),
                     child: Text('Forgot Password?'),
                   ),
                 ),
@@ -101,7 +88,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = widget.onTap,
+                          ..onTap = () => widget.onTap(AuthRouteType.signUp),
                       ),
                     ],
                   ),
@@ -115,14 +102,14 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget _buildButton() {
-    return BlocBuilder<AuthBlocBloc, AuthBlocState>(
+    return BlocBuilder<AuthBloc, AuthBlocState>(
       builder: (context, state) {
         if (state is AuthBlocLoading) {
           return const Center(child: CircularProgressIndicator());
         } else {
           return MyButton(
             text: 'Sign In',
-            onTap: () => context.read<AuthBlocBloc>().add(
+            onTap: () => context.read<AuthBloc>().add(
               AuthSignIn(
                 email: emailController.text,
                 password: passwordController.text,
