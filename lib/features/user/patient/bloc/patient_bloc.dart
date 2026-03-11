@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:cura_watch/core/api/api_consumer.dart';
 import 'package:cura_watch/core/api/dio_consumer.dart';
 import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/errors/exception.dart';
-import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/features/user/shared/model/doctor.dart';
 import 'package:cura_watch/features/user/shared/model/patient.dart';
 import 'package:cura_watch/features/user/shared/model/vital_info.dart';
@@ -17,21 +15,33 @@ part 'patient_state.dart';
 class PatientBloc extends Bloc<PatientEvent, PatientState> {
   final DioConsumer dioConsumer;
 
-  StreamSubscription? _poll;
+  StreamSubscription? _pollVitalInfo;
+  StreamSubscription? _pollVitalList;
 
-  void startPolling() {
-    _poll = Stream.periodic(const Duration(minutes: 1)).listen((_) {
+  void startPollingVitalInfo() {
+    _pollVitalInfo = Stream.periodic(const Duration(seconds: 30)).listen((_) {
       add(GetVitalInfoEvent());
     });
   }
 
-  void stopPolling() {
-    _poll?.cancel();
+  void stopPollingVitalInfo() {
+    _pollVitalInfo?.cancel();
+  }
+
+  void startPollingVitalList(String range) {
+    _pollVitalList = Stream.periodic(const Duration(seconds: 30)).listen((_) {
+      add(VitalReportEvent(range: range));
+    });
+  }
+
+  void stopPollingVitalList() {
+    _pollVitalList?.cancel();
   }
 
   @override
   Future<void> close() {
-    _poll?.cancel();
+    _pollVitalInfo?.cancel();
+    _pollVitalList?.cancel();
     return super.close();
   }
 
@@ -44,8 +54,6 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
     on<GetVitalInfoEvent>(_getVitalInfo);
     on<DeleteVitalInfoEvent>(_deleteVitalInfo);
     on<VitalReportEvent>(_vitalReport);
-
-    startPolling();
   }
 
   Future<void> _getPatientInfo(
@@ -136,7 +144,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   ) async {
     try {
       emit(VitalInfoLoading());
-      final response = await getIt<ApiConsumer>().post(
+      final response = await dioConsumer.post(
         EndPoints.sendVitalInfo,
         data: {
           APIKeys.heartRate: event.heartRate,
@@ -163,7 +171,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   ) async {
     try {
       emit(VitalInfoLoading());
-      final response = await getIt<ApiConsumer>().patch(
+      final response = await dioConsumer.patch(
         '${EndPoints.sendVitalInfo}/${event.id}',
         data: {
           if (event.heartRate != null) APIKeys.heartRate: event.heartRate,
@@ -188,10 +196,8 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   ) async {
     try {
       emit(VitalInfoLoading());
-      final response = await getIt<ApiConsumer>().delete(
-        EndPoints.getVitalInfo,
-      );
-      emit(VitalInfoLoaded(vitalInfo: VitalInfo.fromJson(response['data'])));
+      final response = await dioConsumer.get(EndPoints.getVitalInfo);
+      emit(VitalInfoLoaded(vitalInfo: VitalInfo.fromJson(response['data'][0])));
     } on ServerException catch (e) {
       emit(VitalInfoError(message: e.errorModel.message));
     } catch (e) {
@@ -205,7 +211,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   ) async {
     try {
       emit(VitalInfoLoading());
-      final response = await getIt<ApiConsumer>().delete(
+      final response = await dioConsumer.delete(
         '${EndPoints.sendVitalInfo}/${event.id}',
       );
       emit(VitalInfoLoaded(vitalInfo: VitalInfo.fromJson(response['data'])));
@@ -222,12 +228,12 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   ) async {
     try {
       emit(VitalInfoListLoading());
-      final response = await getIt<ApiConsumer>().delete(
+      final response = await dioConsumer.get(
         EndPoints.vitalReports,
         queryParameters: {'range': event.range},
       );
-      List<VitalInfo> vitalInfoList = response['data']
-          .map((e) => VitalInfo.fromJson(e))
+      List<VitalInfo> vitalInfoList = (response['data'] as List<dynamic>)
+          .map((e) => VitalInfo.fromJson(e as Map<String, dynamic>))
           .toList();
       emit(VitalInfoListLoaded(vitalInfoList: vitalInfoList));
     } on ServerException catch (e) {

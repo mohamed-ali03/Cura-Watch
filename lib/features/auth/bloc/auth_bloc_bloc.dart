@@ -29,17 +29,11 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
         EndPoints.signIn,
         data: {APIKeys.email: event.email, APIKeys.password: hashpassword},
       );
-      await getIt<CacheHelper>().saveData(
-        key: APIKeys.token,
-        value: response[APIKeys.token],
-      );
-      await getIt<CacheHelper>().saveData(
-        key: APIKeys.id,
-        value: response[APIKeys.data][APIKeys.id],
-      );
-      await getIt<CacheHelper>().saveData(
-        key: APIKeys.role,
-        value: response[APIKeys.data][APIKeys.role],
+      await getIt<CacheHelper>().saveUserData(
+        token: response[APIKeys.token],
+        id: response[APIKeys.data][APIKeys.id],
+        role: response[APIKeys.data][APIKeys.role],
+        fullName: response[APIKeys.data][APIKeys.fullName],
       );
       emit(AuthBlocSuccess(user: User.fromJson(response[APIKeys.data])));
     } on ServerException catch (e) {

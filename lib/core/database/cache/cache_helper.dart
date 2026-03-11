@@ -1,3 +1,4 @@
+import 'package:cura_watch/core/api/end_points.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,6 +7,21 @@ class CacheHelper {
 
   Future<void> init() async {
     sharedPreferences = await SharedPreferences.getInstance();
+  }
+
+  Future<bool> saveUserData({
+    required String token,
+    required String id,
+    required String role,
+    required String fullName,
+  }) async {
+    if (await saveData(key: APIKeys.fullName, value: fullName) &&
+        await saveData(key: APIKeys.token, value: token) &&
+        await saveData(key: APIKeys.id, value: id) &&
+        await saveData(key: APIKeys.role, value: role)) {
+      return true;
+    }
+    return false;
   }
 
   Future<bool> saveData({required String key, required dynamic value}) async {

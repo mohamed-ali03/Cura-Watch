@@ -1,4 +1,5 @@
 // Text Style
+import 'package:cura_watch/features/user/patient/presentation/report_page.dart';
 import 'package:flutter/material.dart';
 
 final TextStyle headerTextStyle = TextStyle(
@@ -57,3 +58,107 @@ enum AuthRouteType {
   verification,
   resetPassword,
 }
+
+// --------------------------------------------------------------
+List<Map<String, dynamic>> reportData = [
+  {
+    'name': 'Blood Pressure',
+    'icon': Icons.monitor_heart, // heart + ECG style
+    'readings': <Reading>[],
+    'unit': 'mmHg',
+    'normalRangeMin': 110.0,
+    'normalRangeMax': 135.0,
+  },
+  {
+    'name': 'Heart Rate',
+    'icon': Icons.favorite, // classic heart icon
+    'readings': <Reading>[],
+    'unit': 'bpm',
+    'normalRangeMin': 65.0,
+    'normalRangeMax': 82.0,
+  },
+  {
+    'name': 'Oxygen',
+    'icon': Icons.air, // represents breathing / oxygen
+    'readings': <Reading>[],
+    'unit': '%',
+    'normalRangeMin': 96.0,
+    'normalRangeMax': 99.0,
+  },
+  {
+    'name': 'Steps',
+    'icon': Icons.directions_walk, // walking icon
+    'readings': <Reading>[],
+    'unit': 'step',
+    'normalRangeMin': 5840.0,
+    'normalRangeMax': 1000.0,
+  },
+  {
+    'name': 'Temperature',
+    'icon': Icons.thermostat, // thermometer icon
+    'readings': <Reading>[],
+    'unit': '°C',
+    'normalRangeMin': 36.0,
+    'normalRangeMax': 37.0,
+  },
+  {
+    'name': 'Glucose',
+    'icon': Icons.bloodtype, // blood drop icon
+    'readings': <Reading>[],
+    'unit': 'mg/dL',
+    'normalRangeMin': 85.0,
+    'normalRangeMax': 114.0,
+  },
+];
+
+// --------------------------------------------------------------
+// Day readings (1-22 hours) - 2026, 3, 11
+final dayReadings = [
+  Reading(date: DateTime(2026, 3, 11, 1), value: 58.0),
+  Reading(date: DateTime(2026, 3, 11, 2), value: 55.0),
+  Reading(date: DateTime(2026, 3, 11, 3), value: 54.0),
+  Reading(date: DateTime(2026, 3, 11, 4), value: 53.0),
+  Reading(date: DateTime(2026, 3, 11, 5), value: 55.0),
+  Reading(date: DateTime(2026, 3, 11, 6), value: 60.0),
+  Reading(date: DateTime(2026, 3, 11, 7), value: 72.0),
+  Reading(date: DateTime(2026, 3, 11, 8), value: 85.0),
+  Reading(date: DateTime(2026, 3, 11, 9), value: 90.0),
+  Reading(date: DateTime(2026, 3, 11, 10), value: 88.0),
+  Reading(date: DateTime(2026, 3, 11, 11), value: 92.0),
+  Reading(date: DateTime(2026, 3, 11, 12), value: 95.0),
+  Reading(date: DateTime(2026, 3, 11, 13), value: 98.0),
+  Reading(date: DateTime(2026, 3, 11, 14), value: 94.0),
+  Reading(date: DateTime(2026, 3, 11, 15), value: 100.0),
+  Reading(date: DateTime(2026, 3, 11, 16), value: 96.0),
+  Reading(date: DateTime(2026, 3, 11, 17), value: 110.0),
+  Reading(date: DateTime(2026, 3, 11, 18), value: 105.0),
+  Reading(date: DateTime(2026, 3, 11, 19), value: 88.0),
+  Reading(date: DateTime(2026, 3, 11, 20), value: 82.0),
+  Reading(date: DateTime(2026, 3, 11, 21), value: 75.0),
+  Reading(date: DateTime(2026, 3, 11, 22), value: 70.0),
+];
+
+// Week readings (Sun=8 Mar, Fri=13 Mar 2026)
+final weekReadings = [
+  Reading(date: DateTime(2026, 3, 8), value: 78.0), // Sun
+  Reading(date: DateTime(2026, 3, 9), value: 82.0), // Mon
+  Reading(date: DateTime(2026, 3, 10), value: 88.0), // Tue
+  Reading(date: DateTime(2026, 3, 11), value: 85.0), // Wed
+  Reading(date: DateTime(2026, 3, 12), value: 90.0), // Thu
+  Reading(date: DateTime(2026, 3, 13), value: 86.0), // Fri
+];
+
+// Month readings (day 1-11 of Mar 2026, last at 10 PM)
+final monthReadings = [
+  Reading(date: DateTime(2026, 3, 1), value: 80.0),
+  Reading(date: DateTime(2026, 3, 2), value: 76.0),
+  Reading(date: DateTime(2026, 3, 3), value: 82.0),
+  Reading(date: DateTime(2026, 3, 4), value: 79.0),
+  Reading(date: DateTime(2026, 3, 5), value: 85.0),
+  Reading(date: DateTime(2026, 3, 6), value: 91.0),
+  Reading(date: DateTime(2026, 3, 7), value: 87.0),
+  Reading(date: DateTime(2026, 3, 8), value: 83.0),
+  Reading(date: DateTime(2026, 3, 9), value: 78.0),
+  Reading(date: DateTime(2026, 3, 10), value: 81.0),
+  Reading(date: DateTime(2026, 3, 11, 22), value: 70.0),
+];

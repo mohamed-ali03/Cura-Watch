@@ -1,4 +1,6 @@
+import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/constants.dart';
+import 'package:cura_watch/core/database/cache/cache_helper.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
@@ -14,6 +16,15 @@ class PatientDashboard extends StatefulWidget {
 }
 
 class _PatientDashboardState extends State<PatientDashboard> {
+  late String userNmae;
+
+  @override
+  void initState() {
+    userNmae = getIt<CacheHelper>().getData(key: APIKeys.fullName);
+    context.read<PatientBloc>().startPollingVitalInfo();
+    super.initState();
+  }
+
   List<Map<String, dynamic>> healthData = [
     {
       'name': 'Blood Pressure',
@@ -38,7 +49,7 @@ class _PatientDashboardState extends State<PatientDashboard> {
     {
       'name': 'Temperature',
       'icon': Icons.thermostat, // thermometer icon
-      'data': '98.6°F',
+      'data': '98.6°C',
     },
     {
       'name': 'Glucose',
@@ -49,54 +60,62 @@ class _PatientDashboardState extends State<PatientDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // title
-          Text('Dashboard', style: headerTextStyle),
-          // logo
-          Image.asset('assets/logo/curawatch.jpeg'),
-          SizedBox(height: getIt<SizeConfig>().blockHight * 3),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          context.read<PatientBloc>().stopPollingVitalInfo();
+        }
+      },
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // title
+            Text('Dashboard', style: headerTextStyle),
+            // logo
+            Image.asset('assets/logo/curawatch.jpeg'),
+            SizedBox(height: getIt<SizeConfig>().blockHight * 3),
 
-          // welcome sentence
-          Text('Good Day, Mohamed', style: headerTextStyle),
-          Text('Track your vitals & stay healthy', style: bodyTextStyle),
+            // welcome sentence
+            Text('Good Day, $userNmae', style: headerTextStyle),
+            Text('Track your vitals & stay healthy', style: bodyTextStyle),
 
-          // grid view
-          BlocBuilder<PatientBloc, PatientState>(
-            buildWhen: (previous, current) => current is VitalInfoLoaded,
-            builder: (context, state) {
-              if (state is VitalInfoLoaded) {
-                healthData[1]['data'] = state.vitalInfo.pressure;
-                healthData[2]['data'] = state.vitalInfo.heartRate;
-                healthData[3]['data'] = state.vitalInfo.oxygen;
-                healthData[4]['data'] = state.vitalInfo.steps;
-                healthData[5]['data'] = state.vitalInfo.temperature;
-                healthData[6]['data'] = state.vitalInfo.glucose;
-              }
+            // grid view
+            BlocBuilder<PatientBloc, PatientState>(
+              buildWhen: (previous, current) =>
+                  current is VitalInfoLoaded && previous is VitalInfoLoading,
+              builder: (context, state) {
+                if (state is VitalInfoLoaded) {
+                  healthData[0]['data'] = '${state.vitalInfo.pressure} mmHg';
+                  healthData[1]['data'] = '${state.vitalInfo.heartRate} bpm';
+                  healthData[2]['data'] = '${state.vitalInfo.oxygen}%';
+                  healthData[3]['data'] = '${state.vitalInfo.steps}';
+                  healthData[4]['data'] = '${state.vitalInfo.temperature}°C';
+                  healthData[5]['data'] = '${state.vitalInfo.glucose} mg/dL';
+                }
 
-              return GridView.builder(
-                itemCount: 6,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: getIt<SizeConfig>().blockHight * 3,
-                  mainAxisSpacing: getIt<SizeConfig>().blockHight * 3,
-                  childAspectRatio: 4 / 3,
-                ),
-                itemBuilder: (context, index) {
-                  return VitalBox(
-                    vitalName: healthData[index]['name']!,
-                    vitalIcon: healthData[index]['icon']!,
-                    vitalData: healthData[index]['data']!,
-                  );
-                },
-              );
-            },
-          ),
-        ],
+                return GridView.builder(
+                  itemCount: 6,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: getIt<SizeConfig>().blockHight * 3,
+                    mainAxisSpacing: getIt<SizeConfig>().blockHight * 3,
+                    childAspectRatio: 4 / 3,
+                  ),
+                  itemBuilder: (context, index) {
+                    return VitalBox(
+                      vitalName: healthData[index]['name']!,
+                      vitalIcon: healthData[index]['icon']!,
+                      vitalData: healthData[index]['data']!,
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

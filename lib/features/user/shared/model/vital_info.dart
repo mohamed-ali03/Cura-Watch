@@ -24,15 +24,15 @@ class VitalInfo {
   });
 
   factory VitalInfo.fromJson(Map<String, dynamic> json) => VitalInfo(
-    id: json["id"],
-    patientId: json["patient_id"],
-    heartRate: json["heart_rate"],
-    oxygen: json["oxygen"],
-    steps: json["steps"],
+    id: json["id"] ?? '',
+    patientId: json["patient_id"] ?? '',
+    heartRate: json["heart_rate"] ?? 0,
+    oxygen: json["oxygen"] ?? 0,
+    steps: json["steps"] ?? 0,
     locations: Locations.fromJson(json["locations"]),
-    temperature: json["temperature"]?.toDouble(),
-    glucose: json["glucose"],
-    pressure: json["pressure"],
+    temperature: json["temperature"] ?? 0,
+    glucose: json["glucose"] ?? 0,
+    pressure: json["pressure"] ?? '',
     readingDate: DateTime.parse(json["reading_date"]),
   );
 
@@ -57,7 +57,7 @@ class Locations {
   Locations({required this.indoor, required this.outdoor});
 
   factory Locations.fromJson(Map<String, dynamic> json) =>
-      Locations(indoor: json["indoor"], outdoor: json["outdoor"]);
+      Locations(indoor: json["indoor"] ?? '', outdoor: json["outdoor"] ?? '');
 
   Map<String, dynamic> toJson() => {"indoor": indoor, "outdoor": outdoor};
 }
