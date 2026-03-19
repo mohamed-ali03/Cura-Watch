@@ -225,6 +225,11 @@ class _ReportBody extends StatelessWidget {
   List<Reading> get _diastolicReadings =>
       readings.where((r) => r.label == 'Diastolic').toList();
 
+  Map<String, dynamic> get pressure => {
+    'Systolic': _systolicReadings,
+    'Diastolic': _diastolicReadings,
+  };
+
   double get _systolicAvg => _systolicReadings.isEmpty
       ? 0
       : _systolicReadings.map((r) => r.value).reduce((a, b) => a + b) /
@@ -343,17 +348,17 @@ class _ReportBody extends StatelessWidget {
             child: config.name == 'Blood Pressure'
                 ? Row(
                     children: [
-                      _bloodPressureStatItem(
+                      _statItem(
                         '${_systolicAvg.round()}/${_diastolicAvg.round()}',
                         'AVG',
                       ),
                       _statDivider(),
-                      _bloodPressureStatItem(
+                      _statItem(
                         '${_systolicMax.round()}/${_diastolicMax.round()}',
                         'MAX',
                       ),
                       _statDivider(),
-                      _bloodPressureStatItem(
+                      _statItem(
                         '${_systolicMin.round()}/${_diastolicMin.round()}',
                         'MIN',
                       ),
@@ -402,8 +407,10 @@ class _ReportBody extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               ...config.name == 'Blood Pressure'
-                  ? _bloodPressureReadingRows()
-                  : readings.map((r) => _readingRow(r)),
+                  ? _groupedBloodPressureRows()
+                  : readings.map(
+                      (r) => _readingRow(r.date, r.value.toString()),
+                    ),
             ],
           ),
         ),
@@ -439,59 +446,9 @@ class _ReportBody extends StatelessWidget {
     ),
   );
 
-  Widget _bloodPressureStatItem(String value, String label) => Expanded(
-    child: Column(
-      children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: value.split('/')[0],
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: _accentRed,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const TextSpan(
-                text: '/',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: _labelGrey,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              TextSpan(
-                text: value.split('/')[1],
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: _accentBlue,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: _labelGrey,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.8,
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _statDivider() => Container(width: 1, height: 40, color: _divider);
 
-  Widget _readingRow(Reading r) => Column(
+  Widget _readingRow(DateTime date, String value) => Column(
     children: [
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -504,7 +461,7 @@ class _ReportBody extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              _shortDate(r.date),
+              _shortDate(date),
               style: const TextStyle(
                 fontSize: 14,
                 color: _textDark,
@@ -516,7 +473,7 @@ class _ReportBody extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: r.value.toInt().toString(),
+                    text: value,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -542,7 +499,7 @@ class _ReportBody extends StatelessWidget {
     ],
   );
 
-  List<Widget> _bloodPressureReadingRows() {
+  List<Widget> _groupedBloodPressureRows() {
     // Group readings by date
     final Map<DateTime, Map<String, Reading>> groupedReadings = {};
 

@@ -1,3 +1,5 @@
+import 'doctor.dart';
+
 class Patient {
   String fullName;
   String email;
@@ -13,6 +15,7 @@ class Patient {
   List<String> allergies;
   Map<String, dynamic> medications;
   Map<String, dynamic> emergencyContact;
+  Doctor? doctor;
 
   Patient({
     required this.fullName,
@@ -29,6 +32,7 @@ class Patient {
     required this.allergies,
     required this.medications,
     required this.emergencyContact,
+    this.doctor,
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) => Patient(
@@ -48,6 +52,7 @@ class Patient {
     allergies: List<String>.from(json["allergies"]?.map((x) => x) ?? []),
     medications: json["medications"] ?? {},
     emergencyContact: json["emergency_contact"] ?? {},
+    doctor: json["doctors"] != null ? Doctor.fromJson(json["doctors"]) : null,
   );
 
   Map<String, dynamic> toJson() => {
