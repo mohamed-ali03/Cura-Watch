@@ -1,5 +1,5 @@
 // Text Style
-import 'package:cura_watch/features/user/patient/presentation/report_page.dart';
+import 'package:cura_watch/features/user/patient/presentation/widgets/reports/report_page.dart';
 import 'package:flutter/material.dart';
 
 final TextStyle headerTextStyle = TextStyle(
@@ -58,58 +58,6 @@ enum AuthRouteType {
   verification,
   resetPassword,
 }
-
-// --------------------------------------------------------------
-List<Map<String, dynamic>> reportData = [
-  {
-    'name': 'Blood Pressure',
-    'icon': Icons.monitor_heart, // heart + ECG style
-    'readings': <Reading>[],
-    'unit': 'mmHg',
-    'normalRangeMin': 110.0,
-    'normalRangeMax': 135.0,
-  },
-  {
-    'name': 'Heart Rate',
-    'icon': Icons.favorite, // classic heart icon
-    'readings': <Reading>[],
-    'unit': 'bpm',
-    'normalRangeMin': 65.0,
-    'normalRangeMax': 82.0,
-  },
-  {
-    'name': 'Oxygen',
-    'icon': Icons.air, // represents breathing / oxygen
-    'readings': <Reading>[],
-    'unit': '%',
-    'normalRangeMin': 96.0,
-    'normalRangeMax': 99.0,
-  },
-  {
-    'name': 'Steps',
-    'icon': Icons.directions_walk, // walking icon
-    'readings': <Reading>[],
-    'unit': 'step',
-    'normalRangeMin': 5840.0,
-    'normalRangeMax': 1000.0,
-  },
-  {
-    'name': 'Temperature',
-    'icon': Icons.thermostat, // thermometer icon
-    'readings': <Reading>[],
-    'unit': '°C',
-    'normalRangeMin': 36.0,
-    'normalRangeMax': 37.0,
-  },
-  {
-    'name': 'Glucose',
-    'icon': Icons.bloodtype, // blood drop icon
-    'readings': <Reading>[],
-    'unit': 'mg/dL',
-    'normalRangeMin': 85.0,
-    'normalRangeMax': 114.0,
-  },
-];
 
 // --------------------------------------------------------------
 // Day readings (1-22 hours) - 2026, 3, 11
