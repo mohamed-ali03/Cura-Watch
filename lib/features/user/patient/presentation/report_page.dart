@@ -9,7 +9,7 @@ enum ReportPeriod { day, week, month }
 
 class Reading {
   final DateTime date;
-  final double value;
+  final dynamic value;
   const Reading({required this.date, required this.value});
 }
 
@@ -41,6 +41,7 @@ class _HealthReportWidgetState extends State<HealthReportWidget> {
   void initState() {
     super.initState();
     // Initialize data based on title
+    context.read<PatientBloc>().add(VitalReportEvent(range: 'monthly'));
     data = reportData.firstWhere((e) => e['name'] == widget.title);
   }
 
@@ -216,16 +217,35 @@ class _HealthReportWidgetState extends State<HealthReportWidget> {
         }
         if (state is VitalInfoListLoaded) {
           data['readings'].clear();
-          switch (_period.value) {
-            case ReportPeriod.day:
-              data['readings'].addAll(dayReadings);
-              break;
-            case ReportPeriod.week:
-              data['readings'].addAll(weekReadings);
-              break;
-            case ReportPeriod.month:
-              data['readings'].addAll(monthReadings);
-              break;
+
+          for (int i = 0; i < state.vitalInfoList.length; i++) {
+            final vitalInfo = state.vitalInfoList[i];
+            final value = switch (data['name']) {
+              'Blood Pressure' => vitalInfo.pressure,
+              'Temperature' => vitalInfo.temperature,
+              'Heart Rate' => vitalInfo.heartRate,
+              'Steps' => vitalInfo.steps,
+              'Oxygen' => vitalInfo.oxygen,
+              'Glucose' => vitalInfo.glucose,
+              _ => null,
+            };
+
+            if (value != null) {
+              double numericValue;
+              if (value is String) {
+                numericValue = double.tryParse(value) ?? 0.0;
+              } else if (value is int) {
+                numericValue = value.toDouble();
+              } else if (value is double) {
+                numericValue = value;
+              } else {
+                numericValue = 0.0;
+              }
+
+              data['readings'].add(
+                Reading(date: vitalInfo.readingDate, value: numericValue),
+              );
+            }
           }
         }
         return Column(
@@ -448,12 +468,16 @@ class _LineChartPainter extends CustomPainter {
     final chartW = size.width - leftPad - rightPad;
     final chartH = size.height - topPad - bottomPad;
 
-    // ── Y range ───────────────────────────────────
-    final values = readings.map((r) => r.value).toList();
+    // ── Sort readings by date and get date range ───────────────────────────────────
+    final sortedReadings = List<Reading>.from(readings)
+      ..sort((a, b) => a.date.compareTo(b.date));
+    final values = sortedReadings.map((r) => r.value).toList();
     final minV = (values.reduce((a, b) => a < b ? a : b) - 5)
         .clamp(0, 200)
         .toDouble();
     final maxV = (values.reduce((a, b) => a > b ? a : b) + 5).toDouble();
+
+    final minDate = sortedReadings.first.date;
 
     // ── Grid lines + Y labels ─────────────────────
     final gridPaint = Paint()
@@ -486,9 +510,10 @@ class _LineChartPainter extends CustomPainter {
 
     // ── X labels ──────────────────────────────────
     if (period == ReportPeriod.day) {
-      for (int i = 0; i < 12; i++) {
-        final x = leftPad + (i / 11) * chartW;
-        final label = i.toString();
+      // For daily, show hours
+      for (int i = 0; i <= 24; i += 2) {
+        final x = leftPad + (i / 24) * chartW;
+        final label = '${i}h';
         _drawText(
           canvas,
           label,
@@ -498,28 +523,27 @@ class _LineChartPainter extends CustomPainter {
         );
       }
     } else if (period == ReportPeriod.week) {
-      const weekLabels = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
-      for (int i = 0; i < 7; i++) {
-        final x = leftPad + (i / 6) * chartW;
-        final label = weekLabels[i % weekLabels.length];
+      // For week, show day names based on actual dates
+      final weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      for (int i = 0; i < sortedReadings.length; i++) {
+        final x = leftPad + (i / (sortedReadings.length - 1)) * chartW;
+        final dayOfWeek = weekDays[sortedReadings[i].date.weekday % 7];
         _drawText(
           canvas,
-          label,
+          dayOfWeek,
           Offset(x - 12, topPad + chartH + 8),
           labelStyle,
           30,
         );
       }
     } else if (period == ReportPeriod.month) {
-      // Month: show every ~3 days: 1,4,7,10,13,16,19,22,25,28,31
-      const monthMarks = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31];
-      for (final m in monthMarks) {
-        final idx = m - 1;
-        if (idx >= readings.length) continue;
-        final x = leftPad + (idx / (readings.length - 1)) * chartW;
+      // For month, show date numbers based on actual readings
+      for (int i = 0; i < sortedReadings.length; i += 3) {
+        final x = leftPad + (i / (sortedReadings.length - 1)) * chartW;
+        final label = '${sortedReadings[i].date.day}';
         _drawText(
           canvas,
-          m.toString(),
+          label,
           Offset(x - 6, topPad + chartH + 8),
           labelStyle,
           20,
@@ -536,9 +560,13 @@ class _LineChartPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round;
 
     final path = Path();
-    for (int i = 0; i < readings.length; i++) {
-      final t = (readings[i].value - minV) / (maxV - minV);
-      final x = leftPad + (i / (readings.length - 1)) * chartW;
+    for (int i = 0; i < sortedReadings.length; i++) {
+      final t = (sortedReadings[i].value - minV) / (maxV - minV);
+
+      // Calculate X position based on actual date
+      final daysFromStart = sortedReadings[i].date.difference(minDate).inDays;
+      final totalDays = sortedReadings.last.date.difference(minDate).inDays + 1;
+      final x = leftPad + (daysFromStart / totalDays) * chartW;
       final y = topPad + chartH * (1 - t);
       i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
     }
@@ -552,10 +580,15 @@ class _LineChartPainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
 
-    for (int i = 0; i < readings.length; i++) {
-      final t = (readings[i].value - minV) / (maxV - minV);
-      final x = leftPad + (i / (readings.length - 1)) * chartW;
+    for (int i = 0; i < sortedReadings.length; i++) {
+      final t = (sortedReadings[i].value - minV) / (maxV - minV);
+
+      // Calculate X position based on actual date (same as line path)
+      final daysFromStart = sortedReadings[i].date.difference(minDate).inDays;
+      final totalDays = sortedReadings.last.date.difference(minDate).inDays + 1;
+      final x = leftPad + (daysFromStart / totalDays) * chartW;
       final y = topPad + chartH * (1 - t);
+
       canvas.drawCircle(Offset(x, y), 4, dotBorder);
       canvas.drawCircle(Offset(x, y), 3, dotPaint);
     }
