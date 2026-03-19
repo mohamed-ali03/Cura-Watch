@@ -34,7 +34,7 @@ class PeriodToggle extends StatelessWidget {
         ),
         child: ValueListenableBuilder(
           valueListenable: period,
-          builder: (_, current, __) => Row(
+          builder: (context, current, child) => Row(
             children: [
               _btn(ReportPeriod.day, 'Daily', current),
               _btn(ReportPeriod.week, 'Week', current),

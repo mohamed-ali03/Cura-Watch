@@ -6,11 +6,18 @@ import 'package:flutter/material.dart';
 class LineChartPainter extends CustomPainter {
   final List<Reading> readings;
   final ReportPeriod period;
+  final bool isBloodPressure;
 
-  const LineChartPainter({required this.readings, required this.period});
+  const LineChartPainter({
+    required this.readings,
+    required this.period,
+    this.isBloodPressure = false,
+  });
 
   static const _gridColor = Color(0xFFEEF0F3);
   static const _lineColor = Color(0xFFE05252);
+  static const _systolicColor = Color(0xFFE05252);
+  static const _diastolicColor = Color(0xFF4A6FA5);
   static const _labelColor = Color(0xFF9AA3AF);
   static const _axisColor = Color(0xFFD0D5DD);
 
@@ -80,34 +87,125 @@ class LineChartPainter extends CustomPainter {
     // X labels
     _drawXLabels(canvas, sorted, chartW, chartH);
 
-    // Line path
-    final linePaint = Paint()
-      ..color = _lineColor
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    // Line paths
+    if (isBloodPressure) {
+      final systolicReadings = readings
+          .where((r) => r.label == 'Systolic')
+          .toList();
+      final diastolicReadings = readings
+          .where((r) => r.label == 'Diastolic')
+          .toList();
 
-    final path = Path();
-    for (int i = 0; i < sorted.length; i++) {
-      final x = xOf(sorted[i]);
-      final y = yOf(sorted[i].value);
-      i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
+      // Draw systolic line
+      if (systolicReadings.isNotEmpty) {
+        final systolicPath = Path();
+        for (int i = 0; i < systolicReadings.length; i++) {
+          final x = xOf(systolicReadings[i]);
+          final y = yOf(systolicReadings[i].value);
+          i == 0 ? systolicPath.moveTo(x, y) : systolicPath.lineTo(x, y);
+        }
+
+        final systolicPaint = Paint()
+          ..color = _systolicColor
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+
+        canvas.drawPath(systolicPath, systolicPaint);
+      }
+
+      // Draw diastolic line
+      if (diastolicReadings.isNotEmpty) {
+        final diastolicPath = Path();
+        for (int i = 0; i < diastolicReadings.length; i++) {
+          final x = xOf(diastolicReadings[i]);
+          final y = yOf(diastolicReadings[i].value);
+          i == 0 ? diastolicPath.moveTo(x, y) : diastolicPath.lineTo(x, y);
+        }
+
+        final diastolicPaint = Paint()
+          ..color = _diastolicColor
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+
+        canvas.drawPath(diastolicPath, diastolicPaint);
+      }
+    } else {
+      // Single line for other vitals
+      final linePaint = Paint()
+        ..color = _lineColor
+        ..strokeWidth = 2
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+
+      final path = Path();
+      for (int i = 0; i < sorted.length; i++) {
+        final x = xOf(sorted[i]);
+        final y = yOf(sorted[i].value);
+        i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
+      }
+      canvas.drawPath(path, linePaint);
     }
-    canvas.drawPath(path, linePaint);
 
     // Dots
-    final dotFill = Paint()
-      ..color = _lineColor
-      ..style = PaintingStyle.fill;
-    final dotBorder = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
+    if (isBloodPressure) {
+      final systolicReadings = readings
+          .where((r) => r.label == 'Systolic')
+          .toList();
+      final diastolicReadings = readings
+          .where((r) => r.label == 'Diastolic')
+          .toList();
 
-    for (final r in sorted) {
-      final offset = Offset(xOf(r), yOf(r.value));
-      canvas.drawCircle(offset, 4, dotBorder);
-      canvas.drawCircle(offset, 3, dotFill);
+      // Systolic dots
+      final systolicDotFill = Paint()
+        ..color = _systolicColor
+        ..style = PaintingStyle.fill;
+      final systolicDotBorder = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+
+      for (final r in systolicReadings) {
+        final offset = Offset(xOf(r), yOf(r.value));
+        canvas.drawCircle(offset, 4, systolicDotBorder);
+        canvas.drawCircle(offset, 3, systolicDotFill);
+      }
+
+      // Diastolic dots
+      final diastolicDotFill = Paint()
+        ..color = _diastolicColor
+        ..style = PaintingStyle.fill;
+      final diastolicDotBorder = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+
+      for (final r in diastolicReadings) {
+        final offset = Offset(xOf(r), yOf(r.value));
+        canvas.drawCircle(offset, 4, diastolicDotBorder);
+        canvas.drawCircle(offset, 3, diastolicDotFill);
+      }
+    } else {
+      // Single color dots for other vitals
+      final dotFill = Paint()
+        ..color = _lineColor
+        ..style = PaintingStyle.fill;
+      final dotBorder = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+
+      for (final r in sorted) {
+        final offset = Offset(xOf(r), yOf(r.value));
+        canvas.drawCircle(offset, 4, dotBorder);
+        canvas.drawCircle(offset, 3, dotFill);
+      }
+    }
+
+    // Legend for blood pressure
+    if (isBloodPressure) {
+      _drawBloodPressureLegend(canvas, chartW, chartH);
     }
   }
 
@@ -160,7 +258,55 @@ class LineChartPainter extends CustomPainter {
     tp.paint(canvas, offset);
   }
 
+  void _drawBloodPressureLegend(Canvas canvas, double chartW, double chartH) {
+    const legendY = 5.0;
+    const legendItemWidth = 80.0;
+    const legendSpacing = 10.0;
+
+    // Systolic legend
+    final systolicLegendX =
+        _leftPad + (chartW - (2 * legendItemWidth + legendSpacing)) / 2;
+    _drawLegendItem(
+      canvas,
+      systolicLegendX,
+      legendY,
+      _systolicColor,
+      'Systolic',
+    );
+
+    // Diastolic legend
+    final diastolicLegendX = systolicLegendX + legendItemWidth + legendSpacing;
+    _drawLegendItem(
+      canvas,
+      diastolicLegendX,
+      legendY,
+      _diastolicColor,
+      'Diastolic',
+    );
+  }
+
+  void _drawLegendItem(
+    Canvas canvas,
+    double x,
+    double y,
+    Color color,
+    String label,
+  ) {
+    // Draw colored line
+    final linePaint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawLine(Offset(x, y + 6), Offset(x + 20, y + 6), linePaint);
+
+    // Draw label
+    _drawText(canvas, label, Offset(x + 25, y), 50);
+  }
+
   @override
   bool shouldRepaint(LineChartPainter old) =>
-      old.readings != readings || old.period != period;
+      old.readings != readings ||
+      old.period != period ||
+      old.isBloodPressure != isBloodPressure;
 }

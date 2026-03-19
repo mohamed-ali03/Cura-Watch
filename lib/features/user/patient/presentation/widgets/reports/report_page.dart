@@ -24,8 +24,9 @@ enum ReportPeriod {
 class Reading {
   final DateTime date;
   final double value;
+  final String? label; // For blood pressure: 'Systolic' or 'Diastolic'
 
-  const Reading({required this.date, required this.value});
+  const Reading({required this.date, required this.value, this.label});
 }
 // ─── Page ──────────────────────────────────────────────────────────────────
 
@@ -58,10 +59,53 @@ class _HealthReportPageState extends State<HealthReportPage> {
   }
 
   List<Reading> _extractReadings(List<dynamic> vitalInfoList) {
+    if (widget.config.name == 'Blood Pressure') {
+      return vitalInfoList
+          .map((vitalInfo) {
+            final raw = vitalInfo.pressure;
+            if (raw == null) return null;
+
+            // Handle blood pressure format like '80/120'
+            if (raw is String && raw.contains('/')) {
+              final parts = raw.split('/');
+              if (parts.length == 2) {
+                final systolic = double.tryParse(parts[0]);
+                final diastolic = double.tryParse(parts[1]);
+                if (systolic != null && diastolic != null) {
+                  return [
+                    Reading(
+                      date: vitalInfo.readingDate,
+                      value: systolic,
+                      label: 'Systolic',
+                    ),
+                    Reading(
+                      date: vitalInfo.readingDate,
+                      value: diastolic,
+                      label: 'Diastolic',
+                    ),
+                  ];
+                }
+              }
+            }
+
+            // Fallback to single value parsing
+            final value = switch (raw) {
+              String s => double.tryParse(s) ?? 0.0,
+              int i => i.toDouble(),
+              double d => d,
+              _ => 0.0,
+            };
+            return [Reading(date: vitalInfo.readingDate, value: value)];
+          })
+          .where((readings) => readings != null)
+          .expand((readings) => readings!)
+          .toList();
+    }
+
+    // Handle other vitals (non-blood pressure)
     return vitalInfoList
         .map((vitalInfo) {
           final raw = switch (widget.config.name) {
-            'Blood Pressure' => vitalInfo.pressure,
             'Temperature' => vitalInfo.temperature,
             'Heart Rate' => vitalInfo.heartRate,
             'Steps' => vitalInfo.steps,
@@ -70,7 +114,9 @@ class _HealthReportPageState extends State<HealthReportPage> {
             _ => null,
           };
 
-          if (raw == null) return null;
+          if (raw == null) {
+            return null;
+          }
 
           final value = switch (raw) {
             String s => double.tryParse(s) ?? 0.0,
@@ -173,6 +219,38 @@ class _ReportBody extends StatelessWidget {
       ? 0
       : readings.map((r) => r.value).reduce((a, b) => a < b ? a : b);
 
+  // Blood pressure specific stats
+  List<Reading> get _systolicReadings =>
+      readings.where((r) => r.label == 'Systolic').toList();
+  List<Reading> get _diastolicReadings =>
+      readings.where((r) => r.label == 'Diastolic').toList();
+
+  double get _systolicAvg => _systolicReadings.isEmpty
+      ? 0
+      : _systolicReadings.map((r) => r.value).reduce((a, b) => a + b) /
+            _systolicReadings.length;
+
+  double get _diastolicAvg => _diastolicReadings.isEmpty
+      ? 0
+      : _diastolicReadings.map((r) => r.value).reduce((a, b) => a + b) /
+            _diastolicReadings.length;
+
+  double get _systolicMax => _systolicReadings.isEmpty
+      ? 0
+      : _systolicReadings.map((r) => r.value).reduce((a, b) => a > b ? a : b);
+
+  double get _diastolicMax => _diastolicReadings.isEmpty
+      ? 0
+      : _diastolicReadings.map((r) => r.value).reduce((a, b) => a > b ? a : b);
+
+  double get _systolicMin => _systolicReadings.isEmpty
+      ? 0
+      : _systolicReadings.map((r) => r.value).reduce((a, b) => a < b ? a : b);
+
+  double get _diastolicMin => _diastolicReadings.isEmpty
+      ? 0
+      : _diastolicReadings.map((r) => r.value).reduce((a, b) => a < b ? a : b);
+
   String get _dateRange {
     if (readings.isEmpty) return '';
     final sorted = [...readings]..sort((a, b) => a.date.compareTo(b.date));
@@ -242,7 +320,11 @@ class _ReportBody extends StatelessWidget {
             child: ValueListenableBuilder(
               valueListenable: period,
               builder: (_, p, _) => CustomPaint(
-                painter: LineChartPainter(readings: readings, period: p),
+                painter: LineChartPainter(
+                  readings: readings,
+                  period: p,
+                  isBloodPressure: config.name == 'Blood Pressure',
+                ),
                 size: Size.infinite,
               ),
             ),
@@ -258,15 +340,34 @@ class _ReportBody extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              children: [
-                _statItem(_avg.round().toString(), 'AVG'),
-                _statDivider(),
-                _statItem(_max.round().toString(), 'MAX'),
-                _statDivider(),
-                _statItem(_min.round().toString(), 'MIN'),
-              ],
-            ),
+            child: config.name == 'Blood Pressure'
+                ? Row(
+                    children: [
+                      _bloodPressureStatItem(
+                        '${_systolicAvg.round()}/${_diastolicAvg.round()}',
+                        'AVG',
+                      ),
+                      _statDivider(),
+                      _bloodPressureStatItem(
+                        '${_systolicMax.round()}/${_diastolicMax.round()}',
+                        'MAX',
+                      ),
+                      _statDivider(),
+                      _bloodPressureStatItem(
+                        '${_systolicMin.round()}/${_diastolicMin.round()}',
+                        'MIN',
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      _statItem(_avg.round().toString(), 'AVG'),
+                      _statDivider(),
+                      _statItem(_max.round().toString(), 'MAX'),
+                      _statDivider(),
+                      _statItem(_min.round().toString(), 'MIN'),
+                    ],
+                  ),
           ),
         ),
 
@@ -300,7 +401,9 @@ class _ReportBody extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              ...readings.map((r) => _readingRow(r)),
+              ...config.name == 'Blood Pressure'
+                  ? _bloodPressureReadingRows()
+                  : readings.map((r) => _readingRow(r)),
             ],
           ),
         ),
@@ -320,6 +423,56 @@ class _ReportBody extends StatelessWidget {
             fontWeight: FontWeight.w700,
             color: _accentRed,
             letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: _labelGrey,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.8,
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _bloodPressureStatItem(String value, String label) => Expanded(
+    child: Column(
+      children: [
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: value.split('/')[0],
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  color: _accentRed,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const TextSpan(
+                text: '/',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  color: _labelGrey,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              TextSpan(
+                text: value.split('/')[1],
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  color: _accentBlue,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 2),
@@ -388,4 +541,151 @@ class _ReportBody extends StatelessWidget {
       const Divider(height: 1, color: _divider),
     ],
   );
+
+  List<Widget> _bloodPressureReadingRows() {
+    // Group readings by date
+    final Map<DateTime, Map<String, Reading>> groupedReadings = {};
+
+    for (final reading in readings) {
+      final date = DateTime(
+        reading.date.year,
+        reading.date.month,
+        reading.date.day,
+      );
+      if (!groupedReadings.containsKey(date)) {
+        groupedReadings[date] = {};
+      }
+      if (reading.label != null) {
+        groupedReadings[date]![reading.label!] = reading;
+      }
+    }
+
+    // Sort dates and create rows
+    final sortedDates = groupedReadings.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    return sortedDates.map((date) {
+      final readingsForDate = groupedReadings[date]!;
+      final systolic = readingsForDate['Systolic'];
+      final diastolic = readingsForDate['Diastolic'];
+
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: _labelGrey,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  _shortDate(date),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: _textDark,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const Spacer(),
+                if (systolic != null && diastolic != null)
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: systolic.value.toInt().toString(),
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: _accentRed,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        const TextSpan(
+                          text: '/',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: _labelGrey,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        TextSpan(
+                          text: diastolic.value.toInt().toString(),
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: _accentBlue,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' ${config.unit}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: _labelGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (systolic != null)
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: systolic.value.toInt().toString(),
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: _accentRed,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' ${config.unit}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: _labelGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (diastolic != null)
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: diastolic.value.toInt().toString(),
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: _accentBlue,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' ${config.unit}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: _labelGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: _divider),
+        ],
+      );
+    }).toList();
+  }
 }
