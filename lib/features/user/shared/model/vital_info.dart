@@ -30,7 +30,7 @@ class VitalInfo {
     oxygen: json["oxygen"] ?? 0,
     steps: json["steps"] ?? 0,
     locations: Locations.fromJson(json["locations"]),
-    temperature: json["temperature"] ?? 0,
+    temperature: json["temperature"].toDouble() ?? 0,
     glucose: json["glucose"] ?? 0,
     pressure: json["pressure"] ?? '',
     readingDate: DateTime.parse(json["reading_date"]),

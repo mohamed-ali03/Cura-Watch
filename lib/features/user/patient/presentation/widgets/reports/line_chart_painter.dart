@@ -225,11 +225,12 @@ class LineChartPainter extends CustomPainter {
 
     switch (period) {
       case ReportPeriod.day:
-        for (int h = 0; h <= 24; h += 2) {
+        final lastHour = sorted.last.date.hour;
+        for (int h = 0; h <= lastHour; h += 2) {
           _drawText(
             canvas,
             '${h}h',
-            Offset(_leftPad + (h / 24) * chartW - 12, yPos),
+            Offset(_leftPad + (h / lastHour) * chartW - 12, yPos),
             30,
           );
         }

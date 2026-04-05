@@ -5,11 +5,13 @@ import 'package:cura_watch/features/user/patient/presentation/home/patient_dashb
 import 'package:cura_watch/features/user/patient/presentation/home/patient_emergancy.dart';
 import 'package:cura_watch/features/user/patient/presentation/home/patient_profile.dart';
 import 'package:cura_watch/features/user/patient/presentation/home/patient_report.dart';
+import 'package:cura_watch/features/user/shared/model/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PatientHome extends StatefulWidget {
-  const PatientHome({super.key});
+  final Patient patient;
+  const PatientHome({super.key, required this.patient});
 
   @override
   State<PatientHome> createState() => _PatientHomeState();
@@ -18,12 +20,70 @@ class PatientHome extends StatefulWidget {
 class _PatientHomeState extends State<PatientHome> {
   int currentIndex = 0;
 
-  final List<Widget> _pages = [
+  List<Widget> get _pages => [
     PatientDashboard(),
     PatientReport(),
-    PatientEmergancy(),
+    PatientEmergancy(patient: widget.patient),
     PatientProfile(),
   ];
+
+  void showWarningMSG() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Fall Detected'),
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(Icons.close),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.red,
+              size: getIt<SizeConfig>().blockWidth * 35,
+            ),
+            Text(
+              'Do you need help, ${widget.patient.fullName.split(' ').first}?',
+              style: TextStyle(fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Column(
+              children: [
+                Icon(Icons.close, color: Colors.red),
+                Text('Dismiss'),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // TODO: Implement call emergency
+              Navigator.pop(context);
+            },
+            child: Column(
+              children: [
+                Icon(Icons.phone, color: Colors.red),
+                Text('Call Emergency'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +92,9 @@ class _PatientHomeState extends State<PatientHome> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
+          if (false) {
+            showWarningMSG();
+          }
           // Stop polling when leaving dashboard (index 0)
           if (currentIndex == 0 && index != 0) {
             context.read<PatientBloc>().stopPollingVitalInfo();

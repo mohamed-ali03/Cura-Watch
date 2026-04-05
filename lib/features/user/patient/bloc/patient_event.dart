@@ -19,7 +19,7 @@ class EditPatientInfoEvent extends PatientEvent {
   final List<String>? chronicDiseases;
   final List<String>? allergies;
   final Map<String, dynamic>? medications;
-  final Map<String, dynamic>? emergencyContact;
+  final List<Map<String, dynamic>>? emergencyContact;
 
   EditPatientInfoEvent({
     this.fullName,

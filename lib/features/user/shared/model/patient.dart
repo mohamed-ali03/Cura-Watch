@@ -1,5 +1,3 @@
-import 'doctor.dart';
-
 class Patient {
   String fullName;
   String email;
@@ -14,8 +12,7 @@ class Patient {
   List<String> chronicDiseases;
   List<String> allergies;
   Map<String, dynamic> medications;
-  Map<String, dynamic> emergencyContact;
-  Doctor? doctor;
+  List<Map<String, dynamic>> emergencyContact;
 
   Patient({
     required this.fullName,
@@ -32,7 +29,6 @@ class Patient {
     required this.allergies,
     required this.medications,
     required this.emergencyContact,
-    this.doctor,
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) => Patient(
@@ -51,8 +47,9 @@ class Patient {
     ),
     allergies: List<String>.from(json["allergies"]?.map((x) => x) ?? []),
     medications: json["medications"] ?? {},
-    emergencyContact: json["emergency_contact"] ?? {},
-    doctor: json["doctors"] != null ? Doctor.fromJson(json["doctors"]) : null,
+    emergencyContact: List<Map<String, dynamic>>.from(
+      json["emergency_contact"]?.map((x) => x) ?? [],
+    ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -70,6 +67,6 @@ class Patient {
     "chronic_diseases": List<dynamic>.from(chronicDiseases.map((x) => x)),
     "allergies": List<dynamic>.from(allergies.map((x) => x)),
     "medications": medications,
-    "emergency_contact": emergencyContact,
+    "emergency_contact": List<dynamic>.from(emergencyContact.map((x) => x)),
   };
 }

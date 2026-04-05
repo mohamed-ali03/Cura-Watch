@@ -20,7 +20,9 @@ void handleDioException(DioException e) {
     case DioExceptionType.cancel:
       throw ServerException(ErrorModel.fromJson(e.response!.data));
     case DioExceptionType.connectionError:
-      throw ServerException(ErrorModel.fromJson(e.response!.data));
+      throw ServerException(
+        ErrorModel.fromJson({APIKeys.message: e.error.toString()}),
+      );
     case DioExceptionType.unknown:
       throw ServerException(ErrorModel.fromJson(e.response!.data));
 

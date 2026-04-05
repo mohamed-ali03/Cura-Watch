@@ -103,10 +103,11 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
         medications: getMedicationMap(),
 
         assignedDoctorId: _doctorIdController.text,
-        emergencyContact: {
-          _emergencyContacts.value[0]['name']?.text ?? 'Not Defined':
-              _emergencyContacts.value[0]['phone']?.text ?? 'Not Defined',
-        },
+        emergencyContact: _emergencyContacts.value.map((e) {
+          return {
+            e['name']?.text ?? 'Not Defined': e['phone']?.text ?? 'Not Defined',
+          };
+        }).toList(),
       ),
     );
   }

@@ -29,32 +29,32 @@ class _PatientDashboardState extends State<PatientDashboard> {
     {
       'name': 'Blood Pressure',
       'icon': Icons.monitor_heart, // heart + ECG style
-      'data': '120/80 mmHg',
+      'data': 'loading.....',
     },
     {
       'name': 'Heart Rate',
       'icon': Icons.favorite, // classic heart icon
-      'data': '72 bpm',
+      'data': 'loading.....',
     },
     {
       'name': 'Oxygen',
       'icon': Icons.air, // represents breathing / oxygen
-      'data': '98%',
+      'data': 'loading.....',
     },
     {
       'name': 'Steps',
       'icon': Icons.directions_walk, // walking icon
-      'data': '5000',
+      'data': 'loading.....',
     },
     {
       'name': 'Temperature',
       'icon': Icons.thermostat, // thermometer icon
-      'data': '98.6°C',
+      'data': 'loading.....',
     },
     {
       'name': 'Glucose',
       'icon': Icons.bloodtype, // blood drop icon
-      'data': '100 mg/dL',
+      'data': 'loading.....',
     },
   ];
 

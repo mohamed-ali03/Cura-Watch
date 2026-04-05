@@ -322,16 +322,13 @@ class _ReportBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SizedBox(
             height: 140,
-            child: ValueListenableBuilder(
-              valueListenable: period,
-              builder: (_, p, _) => CustomPaint(
-                painter: LineChartPainter(
-                  readings: readings,
-                  period: p,
-                  isBloodPressure: config.name == 'Blood Pressure',
-                ),
-                size: Size.infinite,
+            child: CustomPaint(
+              painter: LineChartPainter(
+                readings: readings,
+                period: period.value,
+                isBloodPressure: config.name == 'Blood Pressure',
               ),
+              size: Size.infinite,
             ),
           ),
         ),
@@ -407,7 +404,7 @@ class _ReportBody extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               ...config.name == 'Blood Pressure'
-                  ? _groupedBloodPressureRows()
+                  ? _pressureRows()
                   : readings.map(
                       (r) => _readingRow(r.date, r.value.toString()),
                     ),
@@ -420,86 +417,90 @@ class _ReportBody extends StatelessWidget {
     );
   }
 
-  Widget _statItem(String value, String label) => Expanded(
-    child: Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w700,
-            color: _accentRed,
-            letterSpacing: -0.5,
+  Widget _statItem(String value, String label) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
+              color: _accentRed,
+              letterSpacing: -0.5,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: _labelGrey,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.8,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: _labelGrey,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.8,
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
   Widget _statDivider() => Container(width: 1, height: 40, color: _divider);
 
-  Widget _readingRow(DateTime date, String value) => Column(
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.calendar_today_outlined,
-              size: 16,
-              color: _labelGrey,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              _shortDate(date),
-              style: const TextStyle(
-                fontSize: 14,
-                color: _textDark,
-                fontWeight: FontWeight.w400,
+  Widget _readingRow(DateTime date, String value) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.calendar_today_outlined,
+                size: 16,
+                color: _labelGrey,
               ),
-            ),
-            const Spacer(),
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: value,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: _accentRed,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' ${config.unit}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: _labelGrey,
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Text(
+                _shortDate(date),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: _textDark,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ),
-          ],
+              const Spacer(),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: value,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: _accentRed,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' ${config.unit}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: _labelGrey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      const Divider(height: 1, color: _divider),
-    ],
-  );
+        const Divider(height: 1, color: _divider),
+      ],
+    );
+  }
 
-  List<Widget> _groupedBloodPressureRows() {
+  List<Widget> _pressureRows() {
     // Group readings by date
     final Map<DateTime, Map<String, Reading>> groupedReadings = {};
 

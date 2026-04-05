@@ -44,6 +44,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             );
           }
+
+          if (state is AuthBlocSuccess) {
+            fullNameController.clear();
+            emailController.clear();
+            phoneNumberController.clear();
+            passwordController.clear();
+            confirmPasswordController.clear();
+            isDoctor.value = false;
+          }
         }
       },
       child: Scaffold(

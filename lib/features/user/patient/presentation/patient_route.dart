@@ -36,7 +36,7 @@ class _PatientRouteState extends State<PatientRoute> {
           if (state.patient.assignedDoctorId.isEmpty) {
             return UserOnBoarding();
           }
-          return PatientHome();
+          return PatientHome(patient: state.patient);
         } else if (state is PatientLoadingError) {
           return Scaffold(
             appBar: AppBar(
