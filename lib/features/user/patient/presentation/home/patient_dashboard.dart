@@ -21,7 +21,8 @@ class _PatientDashboardState extends State<PatientDashboard> {
   @override
   void initState() {
     userNmae = getIt<CacheHelper>().getData(key: APIKeys.fullName);
-    context.read<PatientBloc>().startPollingVitalInfo();
+    // context.read<PatientBloc>().startPollingVitalInfo();
+    context.read<PatientBloc>().add(GetVitalInfoEvent());
     super.initState();
   }
 

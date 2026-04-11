@@ -24,7 +24,7 @@ class _PatientHomeState extends State<PatientHome> {
     PatientDashboard(),
     PatientReport(),
     PatientEmergancy(patient: widget.patient),
-    PatientProfile(),
+    PatientProfile(patient: widget.patient),
   ];
 
   void showWarningMSG() {

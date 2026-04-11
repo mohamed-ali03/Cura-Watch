@@ -10,6 +10,13 @@ final TextStyle headerTextStyle = TextStyle(
 );
 
 final TextStyle subtitleTextStyle = TextStyle(
+  fontSize: 20,
+  letterSpacing: 0.05,
+  fontWeight: FontWeight.w600,
+  color: Color(0xFF2B4464),
+);
+
+final TextStyle subtitleTextStyle2 = TextStyle(
   fontSize: 14,
   letterSpacing: 0.05,
   fontWeight: FontWeight.w600,

@@ -27,7 +27,7 @@ class _OnBoarding1State extends State<OnBoarding1> {
 
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(now.year - 18), // default 18 years old
+      initialDate: now, // default now
       firstDate: DateTime(1900), // minimum DOB
       lastDate: now, // can't pick future date
     );

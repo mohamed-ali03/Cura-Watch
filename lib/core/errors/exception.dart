@@ -76,7 +76,7 @@ void handleDioException(DioException e) {
               APIKeys.status: 422,
             }),
           );
-        case 504: // Gateway Timeout
+        case 504: // Gateway
           throw ServerException(
             ErrorModel.fromJson({
               APIKeys.message:

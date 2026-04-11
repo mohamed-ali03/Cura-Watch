@@ -31,6 +31,19 @@ final class DoctorsLoadingError extends PatientState {
   DoctorsLoadingError({required this.message});
 }
 
+final class DoctorLoading extends PatientState {}
+
+final class DoctorLoaded extends PatientState {
+  final Doctor doctor;
+  DoctorLoaded({required this.doctor});
+}
+
+final class DoctorLoadingError extends PatientState {
+  final String message;
+
+  DoctorLoadingError({required this.message});
+}
+
 final class VitalInfoLoading extends PatientState {}
 
 final class VitalInfoLoaded extends PatientState {

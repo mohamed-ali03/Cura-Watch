@@ -33,7 +33,7 @@ class VitalBox extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(vitalName, style: subtitleTextStyle),
+                Text(vitalName, style: subtitleTextStyle2),
                 Icon(vitalIcon, color: Color(mainColor)),
               ],
             ),

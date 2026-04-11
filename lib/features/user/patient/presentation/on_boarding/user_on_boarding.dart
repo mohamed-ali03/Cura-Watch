@@ -6,12 +6,14 @@ import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boa
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding2.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding3.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding4.dart';
+import 'package:cura_watch/features/user/shared/model/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class UserOnBoarding extends StatefulWidget {
-  const UserOnBoarding({super.key});
+  final Patient? patient;
+  const UserOnBoarding({super.key, this.patient});
 
   @override
   State<UserOnBoarding> createState() => _UserOnBoardingState();
@@ -36,7 +38,7 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
   final ValueNotifier<List<TextEditingController>> _medicationControllers =
       ValueNotifier([TextEditingController()]);
   final ValueNotifier<List<TimeOfDay>> _dosageTimes = ValueNotifier([
-    TimeOfDay(hour: 12, minute: 0),
+    TimeOfDay(hour: 0, minute: 0),
   ]);
 
   // on boarding 4
@@ -53,6 +55,27 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
         _currentPage = _pageController.page!.round();
       });
     });
+
+    if (widget.patient != null) {
+      _heightController.text = widget.patient!.height.toString();
+      _weightController.text = widget.patient!.weight.toString();
+      _isMale.value = widget.patient!.gender == 'male';
+      _selectedDate.value = widget.patient!.dateOfBirth;
+      _selectedBloodType.value = widget.patient!.bloodType;
+      _allergiesController.text = widget.patient!.allergies.join(', ');
+      _selectedDiseases.value = widget.patient!.chronicDiseases;
+      _doctorIdController.text = widget.patient!.assignedDoctorId;
+      _emergencyContacts.value = widget.patient!.emergencyContact
+          .map(
+            (contact) => {
+              'name': TextEditingController(text: contact.keys.first),
+              'phone': TextEditingController(text: contact.values.first),
+            },
+          )
+          .toList();
+      getMedicationSeperated();
+    }
+
     super.initState();
   }
 
@@ -80,14 +103,26 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
     for (int i = 0; i < medications.length; i++) {
       final name = medications[i].text.trim();
       if (name.isNotEmpty) {
-        result[name] = times[i].toString();
+        result[name] = '${times[i].hour}:${times[i].minute}';
       }
     }
     return result;
   }
 
+  void getMedicationSeperated() {
+    for (var medication in widget.patient!.medications.keys) {
+      _medicationControllers.value.add(TextEditingController(text: medication));
+      final parts = widget.patient!.medications[medication]!.split(":");
+      final time = TimeOfDay(
+        hour: int.parse(parts[0]),
+        minute: int.parse(parts[1]),
+      );
+      _dosageTimes.value.add(time);
+    }
+  }
+
   // finish on boarding and send data to server
-  void _finish() {
+  void _finish() async {
     context.read<PatientBloc>().add(
       EditPatientInfoEvent(
         gender: _isMale.value ? 'male' : 'female',
@@ -110,6 +145,9 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
         }).toList(),
       ),
     );
+    if (widget.patient != null) {
+      Navigator.pop(context);
+    }
   }
 
   List<String> titles = [
@@ -127,14 +165,10 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
         title: Text(titles[_currentPage]),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: _currentPage == 0 ? null : _previousPage,
+          onPressed: _currentPage == 0
+              ? () => Navigator.pop(context)
+              : _previousPage,
         ),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/auth'),
-            icon: const Icon(Icons.logout),
-          ),
-        ],
         backgroundColor: Colors.white,
       ),
       body: Padding(

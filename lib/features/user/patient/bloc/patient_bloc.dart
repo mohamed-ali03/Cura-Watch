@@ -49,6 +49,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
     on<GetPatientInfoEvent>(_getPatientInfo);
     on<EditPatientInfoEvent>(_editPatientInfo);
     on<GetDoctors>(_getDoctors);
+    on<GetDoctor>(_getDoctor);
     on<SendVitalInfoEvent>(_sendVitalInfo);
     on<EditVitalInfoEvent>(_editVitalInfo);
     on<GetVitalInfoEvent>(_getVitalInfo);
@@ -135,6 +136,21 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
       emit(DoctorsLoadingError(message: e.errorModel.message));
     } catch (e) {
       emit(DoctorsLoadingError(message: e.toString()));
+    }
+  }
+
+  Future<void> _getDoctor(GetDoctor event, Emitter<PatientState> emit) async {
+    try {
+      emit(DoctorLoading());
+      final response = await dioConsumer.get(
+        '${EndPoints.getDoctor}/${event.id}',
+      );
+
+      emit(DoctorLoaded(doctor: Doctor.fromJson(response["data"])));
+    } on ServerException catch (e) {
+      emit(DoctorLoadingError(message: e.errorModel.message));
+    } catch (e) {
+      emit(DoctorLoadingError(message: e.toString()));
     }
   }
 
@@ -228,10 +244,21 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   ) async {
     try {
       emit(VitalInfoListLoading());
-      final response = await dioConsumer.get(
-        EndPoints.vitalReports,
-        queryParameters: {'range': event.range},
-      );
+
+      final Map<String, dynamic> response;
+
+      if (event.date == null) {
+        response = await dioConsumer.get(
+          EndPoints.vitalReports,
+          queryParameters: {'range': event.range},
+        );
+      } else {
+        response = await dioConsumer.get(
+          EndPoints.specificDateReport,
+          queryParameters: {'week_start': event.date},
+        );
+      }
+
       List<VitalInfo> vitalInfoList = (response['data'] as List<dynamic>)
           .map((e) => VitalInfo.fromJson(e as Map<String, dynamic>))
           .toList();

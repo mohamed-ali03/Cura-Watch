@@ -7,11 +7,15 @@ class EndPoints {
 
   static const String getPatientInfo = 'patients/profile';
   static const String getDoctors = 'auth/doctors';
+  static const String getDoctor = 'doctors';
+  static const String currentDoctorProfile = 'doctors/profile';
+  static const String getAssignedPatient = 'doctors/patients';
 
   static const String sendVitalInfo = 'patients/vitals';
   static const String getVitalInfo = 'patients/vitals-history';
 
   static const String vitalReports = 'patients/vitals-reports';
+  static const String specificDateReport = 'patients/vitals-date-filter';
 }
 
 class APIKeys {

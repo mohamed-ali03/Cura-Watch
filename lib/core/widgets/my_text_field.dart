@@ -9,6 +9,7 @@ class MyTextField extends StatefulWidget {
   final bool isNumber;
   final int numberOfRows;
   final Color? color;
+  final bool isEditable;
 
   const MyTextField({
     super.key,
@@ -19,6 +20,7 @@ class MyTextField extends StatefulWidget {
     this.isNumber = false,
     this.numberOfRows = 1,
     this.color,
+    this.isEditable = true,
   });
 
   @override
@@ -40,6 +42,13 @@ class _MyTextFieldState extends State<MyTextField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.controller,
+      obscureText: isObscure,
+      keyboardType: widget.isNumber ? TextInputType.number : TextInputType.text,
+      inputFormatters: widget.isNumber
+          ? [FilteringTextInputFormatter.digitsOnly]
+          : null,
+      maxLines: widget.numberOfRows,
+      enabled: widget.isEditable,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         hintText: widget.hintText,
@@ -55,12 +64,6 @@ class _MyTextFieldState extends State<MyTextField> {
               )
             : null,
       ),
-      obscureText: isObscure,
-      keyboardType: widget.isNumber ? TextInputType.number : TextInputType.text,
-      inputFormatters: widget.isNumber
-          ? [FilteringTextInputFormatter.digitsOnly]
-          : null,
-      maxLines: widget.numberOfRows,
     );
   }
 }

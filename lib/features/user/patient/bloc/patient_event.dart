@@ -40,6 +40,12 @@ class EditPatientInfoEvent extends PatientEvent {
 
 class GetDoctors extends PatientEvent {}
 
+class GetDoctor extends PatientEvent {
+  final String id;
+
+  GetDoctor({required this.id});
+}
+
 // Vital Info
 class EditVitalInfoEvent extends PatientEvent {
   final String id;
@@ -91,7 +97,8 @@ class DeleteVitalInfoEvent extends PatientEvent {
 
 // Vital Reports
 class VitalReportEvent extends PatientEvent {
-  final String range;
+  final String? range;
+  final String? date;
 
-  VitalReportEvent({required this.range});
+  VitalReportEvent({this.range, this.date});
 }

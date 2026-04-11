@@ -147,6 +147,9 @@ class _DoctorContactWidgetState extends State<DoctorContactWidget> {
               List<Doctor> doctors = [];
               if (state is DoctorsLoaded) {
                 doctors = state.doctors;
+                _searchController.text = doctors
+                    .firstWhere((d) => d.id == widget.doctorIdController.text)
+                    .fullName;
               }
 
               return TextField(

@@ -13,7 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // ─── Models ────────────────────────────────────────────────────────────────
 
 enum ReportPeriod {
-  day('daily'),
+  day('daliy'),
   week('weekly'),
   month('monthly');
 
@@ -131,6 +131,28 @@ class _HealthReportPageState extends State<HealthReportPage> {
         .toList();
   }
 
+  // pick date
+  Future<void> _pickDate() async {
+    DateTime now = DateTime.now();
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: now, // default 18 years old
+      firstDate: DateTime(1900), // minimum DOB
+      lastDate: now, // can't pick future date
+    );
+
+    if (picked != null) {
+      if (context.mounted) {
+        context.read<PatientBloc>().add(
+          VitalReportEvent(
+            date: '${picked.year}-${picked.month}-${picked.day}',
+          ),
+        );
+      }
+    }
+  }
+
   // ── Build ────────────────────────────────────
 
   @override
@@ -143,6 +165,12 @@ class _HealthReportPageState extends State<HealthReportPage> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back_ios),
         ),
+        actions: [
+          IconButton(
+            onPressed: _pickDate,
+            icon: const Icon(Icons.calendar_month, color: Color(mainColor)),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -259,7 +287,7 @@ class _ReportBody extends StatelessWidget {
   String get _dateRange {
     if (readings.isEmpty) return '';
     final sorted = [...readings]..sort((a, b) => a.date.compareTo(b.date));
-    return '${_fmtDate(sorted.last.date)} - ${_fmtDate(sorted.first.date)}';
+    return '${_fmtDate(sorted.first.date)} - ${_fmtDate(sorted.last.date)}';
   }
 
   String _fmtDate(DateTime d) {

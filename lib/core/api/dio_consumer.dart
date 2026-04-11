@@ -35,7 +35,7 @@ class DioConsumer implements ApiConsumer {
             data: isFormData ? FormData.fromMap(data ?? {}) : data,
             queryParameters: queryParameters,
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 60));
       return response.data;
     } on DioException catch (e) {
       handleDioException(e);
@@ -51,7 +51,7 @@ class DioConsumer implements ApiConsumer {
     try {
       final response = await dio
           .get(path, data: data, queryParameters: queryParameters)
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 60));
       return response.data;
     } on DioException catch (e) {
       handleDioException(e);
@@ -72,7 +72,7 @@ class DioConsumer implements ApiConsumer {
             data: isFormData ? FormData.fromMap(data ?? {}) : data,
             queryParameters: queryParameters,
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 60));
       return response.data;
     } on DioException catch (e) {
       handleDioException(e);
@@ -93,7 +93,7 @@ class DioConsumer implements ApiConsumer {
             data: isFormData ? FormData.fromMap(data ?? {}) : data,
             queryParameters: queryParameters,
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 60));
       return response.data;
     } on DioException catch (e) {
       handleDioException(e);

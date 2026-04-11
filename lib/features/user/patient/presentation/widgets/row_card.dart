@@ -35,7 +35,7 @@ class RowCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(vitalName, style: subtitleTextStyle),
+                Text(vitalName, style: subtitleTextStyle2),
                 if (phoneNumber != null) ...[
                   Text(phoneNumber!, style: bodyTextStyle),
                 ] else ...[
