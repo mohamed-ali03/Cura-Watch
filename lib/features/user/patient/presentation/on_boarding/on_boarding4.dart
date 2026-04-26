@@ -1,7 +1,7 @@
 import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/widgets/my_text_field.dart';
+import 'package:cura_watch/features/user/doctor/bloc/doctor_bloc.dart';
 import 'package:cura_watch/features/user/shared/model/doctor.dart';
-import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
 import 'package:cura_watch/features/user/patient/presentation/widgets/add_button.dart';
 import 'package:cura_watch/features/user/patient/presentation/widgets/section_header.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ class _DoctorContactWidgetState extends State<DoctorContactWidget> {
 
   @override
   void initState() {
-    context.read<PatientBloc>().add(GetDoctors());
+    context.read<DoctorBloc>().add(GetAllDoctorsEvent());
     _searchFocusNode.addListener(_onFocusChange);
     super.initState();
   }
@@ -134,7 +134,6 @@ class _DoctorContactWidgetState extends State<DoctorContactWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── My Doctor ──
-          // TODO : make it searchable
           SectionHeader(
             icon: Icons.supervised_user_circle,
             iconColor: const Color(mainColor),
@@ -142,10 +141,10 @@ class _DoctorContactWidgetState extends State<DoctorContactWidget> {
           ),
 
           const SizedBox(height: 12),
-          BlocBuilder<PatientBloc, PatientState>(
+          BlocBuilder<DoctorBloc, DoctorState>(
             builder: (context, state) {
               List<Doctor> doctors = [];
-              if (state is DoctorsLoaded) {
+              if (state is GetAllDoctorLoaded) {
                 doctors = state.doctors;
                 _searchController.text = doctors
                     .firstWhere((d) => d.id == widget.doctorIdController.text)

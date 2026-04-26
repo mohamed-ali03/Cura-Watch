@@ -7,11 +7,13 @@ class LineChartPainter extends CustomPainter {
   final List<Reading> readings;
   final ReportPeriod period;
   final bool isBloodPressure;
+  final bool isDay;
 
   const LineChartPainter({
     required this.readings,
     required this.period,
     this.isBloodPressure = false,
+    this.isDay = false,
   });
 
   static const _gridColor = Color(0xFFEEF0F3);
@@ -37,7 +39,9 @@ class LineChartPainter extends CustomPainter {
     final chartW = size.width - _leftPad - _rightPad;
     final chartH = size.height - _topPad - _bottomPad;
 
-    final sorted = [...readings]..sort((a, b) => a.date.compareTo(b.date));
+    final sortedHours = [...readings]
+      ..sort((a, b) => a.date.hour.compareTo(b.date.hour));
+    final sorted = [...sortedHours]..sort((a, b) => a.date.compareTo(b.date));
     final values = sorted.map((r) => r.value).toList();
 
     final minV = (values.reduce((a, b) => a < b ? a : b) - 5).clamp(0.0, 200.0);
@@ -49,8 +53,13 @@ class LineChartPainter extends CustomPainter {
 
     // Helpers
     double xOf(Reading r) {
-      final days = r.date.difference(minDate).inDays;
-      return _leftPad + (days / totalDays) * chartW;
+      if (isDay) {
+        final val = _leftPad + (r.date.hour / sorted.last.date.hour) * chartW;
+        return val;
+      } else {
+        final days = r.date.difference(minDate);
+        return _leftPad + (days.inDays / totalDays) * chartW;
+      }
     }
 
     double yOf(double value) {

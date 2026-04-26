@@ -1,5 +1,5 @@
 import 'package:cura_watch/core/constants.dart';
-import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
+import 'package:cura_watch/features/user/doctor/bloc/doctor_bloc.dart';
 import 'package:cura_watch/features/user/patient/presentation/widgets/row_card.dart';
 import 'package:cura_watch/features/user/shared/model/doctor.dart';
 import 'package:cura_watch/features/user/shared/model/patient.dart';
@@ -16,12 +16,19 @@ class PatientEmergancy extends StatefulWidget {
 }
 
 class _PatientEmergancyState extends State<PatientEmergancy> {
-  Doctor? doctor;
+  Doctor doctor = Doctor(
+    id: 'Loading.....',
+    fullName: 'Loading.....',
+    email: 'Loading.....',
+    phoneNumber: 'Loading.....',
+    gender: 'Loading.....',
+    availableHours: {},
+  );
   @override
   void initState() {
     super.initState();
-    context.read<PatientBloc>().add(
-      GetDoctor(id: widget.patient.assignedDoctorId),
+    context.read<DoctorBloc>().add(
+      GetDoctorEvent(id: widget.patient.assignedDoctorId),
     );
   }
 
@@ -33,18 +40,18 @@ class _PatientEmergancyState extends State<PatientEmergancy> {
         children: [
           Text('Doctor', style: headerTextStyle),
           const SizedBox(height: 20),
-          BlocBuilder<PatientBloc, PatientState>(
+          BlocBuilder<DoctorBloc, DoctorState>(
+            buildWhen: (previous, current) =>
+                current is GetDoctorLoaded && previous is GetDoctorLoading,
             builder: (context, state) {
-              if (state is DoctorLoaded) {
+              if (state is GetDoctorLoaded) {
                 doctor = state.doctor;
               }
               return RowCard(
                 icon: Icons.person,
-                vitalName: doctor?.fullName ?? 'Loading....',
-                phoneNumber: doctor?.phoneNumber ?? 'Loading....',
-                onShowReport: () => doctor != null
-                    ? makePhoneCall(doctor?.phoneNumber ?? '')
-                    : {},
+                vitalName: doctor.fullName,
+                phoneNumber: doctor.phoneNumber,
+                onShowReport: () => makePhoneCall(doctor.phoneNumber),
               );
             },
           ),

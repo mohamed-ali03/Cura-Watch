@@ -1,11 +1,13 @@
+import 'package:cura_watch/core/api/dio_consumer.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
-import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
+import 'package:cura_watch/features/user/doctor/bloc/doctor_bloc.dart';
 import 'package:cura_watch/features/user/patient/presentation/home/patient_dashboard.dart';
 import 'package:cura_watch/features/user/patient/presentation/home/patient_emergancy.dart';
 import 'package:cura_watch/features/user/patient/presentation/home/patient_profile.dart';
 import 'package:cura_watch/features/user/patient/presentation/home/patient_report.dart';
 import 'package:cura_watch/features/user/shared/model/patient.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +25,10 @@ class _PatientHomeState extends State<PatientHome> {
   List<Widget> get _pages => [
     PatientDashboard(),
     PatientReport(),
-    PatientEmergancy(patient: widget.patient),
+    BlocProvider<DoctorBloc>(
+      create: (context) => DoctorBloc(dioConsumer: DioConsumer(Dio())),
+      child: PatientEmergancy(patient: widget.patient),
+    ),
     PatientProfile(patient: widget.patient),
   ];
 
@@ -94,10 +99,6 @@ class _PatientHomeState extends State<PatientHome> {
         onTap: (index) {
           if (false) {
             showWarningMSG();
-          }
-          // Stop polling when leaving dashboard (index 0)
-          if (currentIndex == 0 && index != 0) {
-            context.read<PatientBloc>().stopPollingVitalInfo();
           }
 
           setState(() {

@@ -1,12 +1,15 @@
+import 'package:cura_watch/core/api/dio_consumer.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/core/widgets/my_button.dart';
+import 'package:cura_watch/features/user/doctor/bloc/doctor_bloc.dart';
 import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding1.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding2.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding3.dart';
 import 'package:cura_watch/features/user/patient/presentation/on_boarding/on_boarding4.dart';
 import 'package:cura_watch/features/user/shared/model/patient.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -198,9 +201,13 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
                     medicationControllers: _medicationControllers,
                     dosageTimes: _dosageTimes,
                   ),
-                  DoctorContactWidget(
-                    doctorIdController: _doctorIdController,
-                    emergencyContacts: _emergencyContacts,
+                  BlocProvider<DoctorBloc>(
+                    create: (context) =>
+                        DoctorBloc(dioConsumer: DioConsumer(Dio())),
+                    child: DoctorContactWidget(
+                      doctorIdController: _doctorIdController,
+                      emergencyContacts: _emergencyContacts,
+                    ),
                   ),
                 ],
               ),

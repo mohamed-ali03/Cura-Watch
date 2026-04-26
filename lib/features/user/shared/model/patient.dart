@@ -1,4 +1,5 @@
 class Patient {
+  String id;
   String fullName;
   String email;
   String password;
@@ -15,6 +16,7 @@ class Patient {
   List<Map<String, dynamic>> emergencyContact;
 
   Patient({
+    required this.id,
     required this.fullName,
     required this.email,
     required this.password,
@@ -32,6 +34,7 @@ class Patient {
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) => Patient(
+    id: json["id"] ?? '',
     fullName: json["full_name"] ?? '',
     email: json["email"] ?? '',
     password: json["password"] ?? '',

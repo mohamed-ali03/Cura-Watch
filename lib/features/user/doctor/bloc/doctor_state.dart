@@ -12,9 +12,9 @@ final class GetAllDoctorLoaded extends DoctorState {
   GetAllDoctorLoaded({required this.doctors});
 }
 
-final class GetAllDoctorError extends DoctorState {
+final class DoctorError extends DoctorState {
   final String message;
-  GetAllDoctorError({required this.message});
+  DoctorError({required this.message});
 }
 
 final class GetCurrentDoctorLoading extends DoctorState {}
@@ -24,21 +24,11 @@ final class GetCurrentDoctorLoaded extends DoctorState {
   GetCurrentDoctorLoaded({required this.doctor});
 }
 
-final class GetCurrentDoctorError extends DoctorState {
-  final String message;
-  GetCurrentDoctorError({required this.message});
-}
-
 final class GetDoctorLoading extends DoctorState {}
 
 final class GetDoctorLoaded extends DoctorState {
   final Doctor doctor;
   GetDoctorLoaded({required this.doctor});
-}
-
-final class GetDoctorError extends DoctorState {
-  final String message;
-  GetDoctorError({required this.message});
 }
 
 final class EditDoctorInfoLoading extends DoctorState {}
@@ -48,11 +38,6 @@ final class EditDoctorInfoLoaded extends DoctorState {
   EditDoctorInfoLoaded({required this.doctor});
 }
 
-final class EditDoctorInfoError extends DoctorState {
-  final String message;
-  EditDoctorInfoError({required this.message});
-}
-
 final class GetAssignedPatientLoading extends DoctorState {}
 
 final class GetAssignedPatientLoaded extends DoctorState {
@@ -60,7 +45,9 @@ final class GetAssignedPatientLoaded extends DoctorState {
   GetAssignedPatientLoaded({required this.patients});
 }
 
-final class GetAssignedPatientError extends DoctorState {
-  final String message;
-  GetAssignedPatientError({required this.message});
+final class DoctorVitalInfoListLoading extends DoctorState {}
+
+final class DoctorVitalInfoListLoaded extends DoctorState {
+  final List<dynamic> vitalInfoList;
+  DoctorVitalInfoListLoaded({required this.vitalInfoList});
 }

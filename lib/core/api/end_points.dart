@@ -14,7 +14,7 @@ class EndPoints {
   static const String sendVitalInfo = 'patients/vitals';
   static const String getVitalInfo = 'patients/vitals-history';
 
-  static const String vitalReports = 'patients/vitals-reports';
+  static const String vitalReports = 'patients/vitals-averages';
   static const String specificDateReport = 'patients/vitals-date-filter';
 }
 

@@ -81,7 +81,8 @@ class _PatientDashboardState extends State<PatientDashboard> {
                 current is VitalInfoLoaded && previous is VitalInfoLoading,
             builder: (context, state) {
               if (state is VitalInfoLoaded) {
-                healthData[0]['data'] = '${state.vitalInfo.pressure} mmHg';
+                healthData[0]['data'] =
+                    '${state.vitalInfo.pressure.isEmpty ? '0/0' : state.vitalInfo.pressure} mmHg';
                 healthData[1]['data'] = '${state.vitalInfo.heartRate} bpm';
                 healthData[2]['data'] = '${state.vitalInfo.oxygen}%';
                 healthData[3]['data'] = '${state.vitalInfo.steps}';

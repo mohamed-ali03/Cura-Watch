@@ -16,12 +16,12 @@ class Doctor {
   });
 
   factory Doctor.fromJson(Map<String, dynamic> json) => Doctor(
-    id: json["id"],
-    fullName: json["full_name"],
-    email: json["email"],
-    phoneNumber: json["phone_number"],
-    gender: json["gender"],
-    availableHours: json["available_hours"],
+    id: json["id"] ?? '',
+    fullName: json["full_name"] ?? '',
+    email: json["email"] ?? '',
+    phoneNumber: json["phone_number"] ?? '',
+    gender: json["gender"] ?? '',
+    availableHours: json["available_hours"] ?? {},
   );
 
   Map<String, dynamic> toJson() => {

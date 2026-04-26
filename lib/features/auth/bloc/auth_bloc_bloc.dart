@@ -24,10 +24,10 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   Future<void> _onSignIn(AuthSignIn event, Emitter<AuthBlocState> emit) async {
     try {
       emit(AuthBlocLoading());
-      String hashpassword = hashPassword(event.password);
+      // String hashpassword = hashPassword(event.password);
       final response = await dioConsumer.post(
         EndPoints.signIn,
-        data: {APIKeys.email: event.email, APIKeys.password: hashpassword},
+        data: {APIKeys.email: event.email, APIKeys.password: event.password},
       );
       await getIt<CacheHelper>().saveUserData(
         token: response[APIKeys.token],

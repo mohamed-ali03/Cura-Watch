@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:cura_watch/core/api/dio_consumer.dart';
 import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/errors/exception.dart';
-import 'package:cura_watch/features/user/shared/model/doctor.dart';
 import 'package:cura_watch/features/user/shared/model/patient.dart';
 import 'package:cura_watch/features/user/shared/model/vital_info.dart';
 import 'package:meta/meta.dart';
@@ -15,41 +14,9 @@ part 'patient_state.dart';
 class PatientBloc extends Bloc<PatientEvent, PatientState> {
   final DioConsumer dioConsumer;
 
-  StreamSubscription? _pollVitalInfo;
-  StreamSubscription? _pollVitalList;
-
-  void startPollingVitalInfo() {
-    _pollVitalInfo = Stream.periodic(const Duration(seconds: 30)).listen((_) {
-      add(GetVitalInfoEvent());
-    });
-  }
-
-  void stopPollingVitalInfo() {
-    _pollVitalInfo?.cancel();
-  }
-
-  void startPollingVitalList(String range) {
-    _pollVitalList = Stream.periodic(const Duration(seconds: 30)).listen((_) {
-      add(VitalReportEvent(range: range));
-    });
-  }
-
-  void stopPollingVitalList() {
-    _pollVitalList?.cancel();
-  }
-
-  @override
-  Future<void> close() {
-    _pollVitalInfo?.cancel();
-    _pollVitalList?.cancel();
-    return super.close();
-  }
-
   PatientBloc({required this.dioConsumer}) : super(PatientInitial()) {
     on<GetPatientInfoEvent>(_getPatientInfo);
     on<EditPatientInfoEvent>(_editPatientInfo);
-    on<GetDoctors>(_getDoctors);
-    on<GetDoctor>(_getDoctor);
     on<SendVitalInfoEvent>(_sendVitalInfo);
     on<EditVitalInfoEvent>(_editVitalInfo);
     on<GetVitalInfoEvent>(_getVitalInfo);
@@ -120,40 +87,6 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
     }
   }
 
-  Future<void> _getDoctors(GetDoctors event, Emitter<PatientState> emit) async {
-    try {
-      emit(DoctorsLoading());
-      final response = await dioConsumer.get(EndPoints.getDoctors);
-
-      emit(
-        DoctorsLoaded(
-          doctors: (response["data"] as List)
-              .map((doctor) => Doctor.fromJson(doctor))
-              .toList(),
-        ),
-      );
-    } on ServerException catch (e) {
-      emit(DoctorsLoadingError(message: e.errorModel.message));
-    } catch (e) {
-      emit(DoctorsLoadingError(message: e.toString()));
-    }
-  }
-
-  Future<void> _getDoctor(GetDoctor event, Emitter<PatientState> emit) async {
-    try {
-      emit(DoctorLoading());
-      final response = await dioConsumer.get(
-        '${EndPoints.getDoctor}/${event.id}',
-      );
-
-      emit(DoctorLoaded(doctor: Doctor.fromJson(response["data"])));
-    } on ServerException catch (e) {
-      emit(DoctorLoadingError(message: e.errorModel.message));
-    } catch (e) {
-      emit(DoctorLoadingError(message: e.toString()));
-    }
-  }
-
   Future<void> _sendVitalInfo(
     SendVitalInfoEvent event,
     Emitter<PatientState> emit,
@@ -213,7 +146,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
     try {
       emit(VitalInfoLoading());
       final response = await dioConsumer.get(EndPoints.getVitalInfo);
-      emit(VitalInfoLoaded(vitalInfo: VitalInfo.fromJson(response['data'][0])));
+      emit(VitalInfoLoaded(vitalInfo: VitalInfo.fromJson(response['data'])));
     } on ServerException catch (e) {
       emit(VitalInfoError(message: e.errorModel.message));
     } catch (e) {
@@ -253,10 +186,34 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
           queryParameters: {'range': event.range},
         );
       } else {
-        response = await dioConsumer.get(
-          EndPoints.specificDateReport,
-          queryParameters: {'week_start': event.date},
-        );
+        if (event.range == 'week') {
+          response = await dioConsumer.get(
+            EndPoints.specificDateReport,
+            queryParameters: {
+              'week_start': () {
+                final d = event.date!;
+                final monday = d.subtract(Duration(days: d.weekday - 1));
+                return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
+              }(),
+            },
+          );
+        } else if (event.range == 'month') {
+          response = await dioConsumer.get(
+            EndPoints.specificDateReport,
+            queryParameters: {
+              'month': event.date!.month,
+              'year': event.date!.year,
+            },
+          );
+        } else {
+          response = await dioConsumer.get(
+            EndPoints.specificDateReport,
+            queryParameters: {
+              'date':
+                  '${event.date!.year}-${event.date!.month}-${event.date!.day}',
+            },
+          );
+        }
       }
 
       List<VitalInfo> vitalInfoList = (response['data'] as List<dynamic>)

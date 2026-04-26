@@ -18,32 +18,6 @@ final class PatientLoadingError extends PatientState {
   PatientLoadingError({required this.message});
 }
 
-final class DoctorsLoading extends PatientState {}
-
-final class DoctorsLoaded extends PatientState {
-  final List<Doctor> doctors;
-  DoctorsLoaded({required this.doctors});
-}
-
-final class DoctorsLoadingError extends PatientState {
-  final String message;
-
-  DoctorsLoadingError({required this.message});
-}
-
-final class DoctorLoading extends PatientState {}
-
-final class DoctorLoaded extends PatientState {
-  final Doctor doctor;
-  DoctorLoaded({required this.doctor});
-}
-
-final class DoctorLoadingError extends PatientState {
-  final String message;
-
-  DoctorLoadingError({required this.message});
-}
-
 final class VitalInfoLoading extends PatientState {}
 
 final class VitalInfoLoaded extends PatientState {

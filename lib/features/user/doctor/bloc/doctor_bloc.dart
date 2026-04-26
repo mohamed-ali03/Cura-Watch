@@ -4,6 +4,7 @@ import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/errors/exception.dart';
 import 'package:cura_watch/features/user/shared/model/doctor.dart';
 import 'package:cura_watch/features/user/shared/model/patient.dart';
+import 'package:cura_watch/features/user/shared/model/vital_info.dart';
 import 'package:meta/meta.dart';
 
 part 'doctor_event.dart';
@@ -19,6 +20,7 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     on<GetCurrentDoctorEvent>(_getCurrentDoctor);
     on<EditDoctorEvent>(_editDoctorInfo);
     on<GetAssignedPatient>(_getAssignedPatient);
+    on<DoctorVitalReportEvent>(_getVitalInfo);
   }
 
   Future<void> _getDoctors(
@@ -37,9 +39,9 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
         ),
       );
     } on ServerException catch (e) {
-      emit(GetAllDoctorError(message: e.errorModel.message));
+      emit(DoctorError(message: e.errorModel.message));
     } catch (e) {
-      emit(GetAllDoctorError(message: e.toString()));
+      emit(DoctorError(message: e.toString()));
     }
   }
 
@@ -48,16 +50,16 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     Emitter<DoctorState> emit,
   ) async {
     try {
-      emit(GetCurrentDoctorLoading());
+      emit(GetDoctorLoading());
       final response = await dioConsumer.get(
         '${EndPoints.getDoctor}/${event.id}',
       );
 
-      emit(GetCurrentDoctorLoaded(doctor: Doctor.fromJson(response["data"])));
+      emit(GetDoctorLoaded(doctor: Doctor.fromJson(response["data"])));
     } on ServerException catch (e) {
-      emit(GetCurrentDoctorError(message: e.errorModel.message));
+      emit(DoctorError(message: e.errorModel.message));
     } catch (e) {
-      emit(GetCurrentDoctorError(message: e.toString()));
+      emit(DoctorError(message: e.toString()));
     }
   }
 
@@ -71,9 +73,9 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
 
       emit(GetCurrentDoctorLoaded(doctor: Doctor.fromJson(response["data"])));
     } on ServerException catch (e) {
-      emit(GetCurrentDoctorError(message: e.errorModel.message));
+      emit(DoctorError(message: e.errorModel.message));
     } catch (e) {
-      emit(GetCurrentDoctorError(message: e.toString()));
+      emit(DoctorError(message: e.toString()));
     }
   }
 
@@ -83,7 +85,7 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
   ) async {
     try {
       emit(EditDoctorInfoLoading());
-      final response = await dioConsumer.get(
+      final response = await dioConsumer.patch(
         EndPoints.currentDoctorProfile,
         data: {
           if (event.fullName != null) 'full_name': event.fullName,
@@ -96,9 +98,9 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
       );
       emit(EditDoctorInfoLoaded(doctor: Doctor.fromJson(response['data'])));
     } on ServerException catch (e) {
-      emit(EditDoctorInfoError(message: e.errorModel.message));
+      emit(DoctorError(message: e.errorModel.message));
     } catch (e) {
-      emit(EditDoctorInfoError(message: e.toString()));
+      emit(DoctorError(message: e.toString()));
     }
   }
 
@@ -117,9 +119,65 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
         ),
       );
     } on ServerException catch (e) {
-      emit(GetAssignedPatientError(message: e.errorModel.message));
+      emit(DoctorError(message: e.errorModel.message));
     } catch (e) {
-      emit(GetAssignedPatientError(message: e.toString()));
+      emit(DoctorError(message: e.toString()));
+    }
+  }
+
+  Future<void> _getVitalInfo(
+    DoctorVitalReportEvent event,
+    Emitter<DoctorState> emit,
+  ) async {
+    try {
+      emit(DoctorVitalInfoListLoading());
+
+      final Map<String, dynamic> response;
+
+      if (event.date == null) {
+        response = await dioConsumer.get(
+          '${EndPoints.getAssignedPatient}/${event.patientId}/vitals-averages',
+          queryParameters: {'range': event.range},
+        );
+      } else {
+        if (event.range == 'week') {
+          response = await dioConsumer.get(
+            '${EndPoints.getAssignedPatient}/${event.patientId}/vitals-averages',
+            queryParameters: {
+              'week_start': () {
+                final d = event.date!;
+                final monday = d.subtract(Duration(days: d.weekday - 1));
+                return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
+              }(),
+            },
+          );
+        } else if (event.range == 'month') {
+          response = await dioConsumer.get(
+            '${EndPoints.getAssignedPatient}/${event.patientId}/vitals-averages',
+            queryParameters: {
+              'month': event.date!.month,
+              'year': event.date!.year,
+            },
+          );
+        } else {
+          response = await dioConsumer.get(
+            '${EndPoints.getAssignedPatient}/${event.patientId}/vitals-averages',
+            queryParameters: {
+              'date':
+                  '${event.date!.year}-${event.date!.month}-${event.date!.day}',
+            },
+          );
+        }
+      }
+
+      List<VitalInfo> vitalInfoList = (response['data'] as List<dynamic>)
+          .map((e) => VitalInfo.fromJson(e as Map<String, dynamic>))
+          .toList();
+      emit(DoctorVitalInfoListLoaded(vitalInfoList: vitalInfoList));
+    } on ServerException catch (e) {
+      emit(DoctorError(message: e.errorModel.message));
+    } catch (e) {
+      emit(DoctorError(message: e.toString()));
     }
   }
 }

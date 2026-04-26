@@ -13,15 +13,12 @@ final class GetDoctorEvent extends DoctorEvent {
 }
 
 final class EditDoctorEvent extends DoctorEvent {
-  final String id;
-
   final String? fullName;
   final String? email;
   final String? phoneNumber;
   final String? gender;
   final Map<String, dynamic>? availableHours;
   EditDoctorEvent({
-    required this.id,
     this.fullName,
     this.email,
     this.phoneNumber,
@@ -31,3 +28,14 @@ final class EditDoctorEvent extends DoctorEvent {
 }
 
 final class GetAssignedPatient extends DoctorEvent {}
+
+final class DoctorVitalReportEvent extends DoctorEvent {
+  final String range;
+  final DateTime? date;
+  final String patientId;
+  DoctorVitalReportEvent({
+    required this.range,
+    required this.patientId,
+    this.date,
+  });
+}

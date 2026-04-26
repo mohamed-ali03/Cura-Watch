@@ -3,19 +3,21 @@
 import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
+import 'package:cura_watch/features/user/doctor/bloc/doctor_bloc.dart';
 import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
 import 'package:cura_watch/features/user/patient/presentation/widgets/reports/line_chart_painter.dart';
 import 'package:cura_watch/features/user/patient/presentation/widgets/reports/period_toggle.dart';
 import 'package:cura_watch/features/user/patient/presentation/widgets/reports/vital_config.dart';
+import 'package:cura_watch/features/user/shared/model/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // ─── Models ────────────────────────────────────────────────────────────────
 
 enum ReportPeriod {
-  day('daliy'),
-  week('weekly'),
-  month('monthly');
+  day('day'),
+  week('week'),
+  month('month');
 
   const ReportPeriod(this.apiRange);
   final String apiRange;
@@ -32,8 +34,8 @@ class Reading {
 
 class HealthReportPage extends StatefulWidget {
   final VitalConfig config;
-
-  const HealthReportPage({super.key, required this.config});
+  final Patient? patient;
+  const HealthReportPage({super.key, required this.config, this.patient});
 
   @override
   State<HealthReportPage> createState() => _HealthReportPageState();
@@ -55,7 +57,16 @@ class _HealthReportPageState extends State<HealthReportPage> {
   }
 
   void _fetchReport(ReportPeriod period) {
-    context.read<PatientBloc>().add(VitalReportEvent(range: period.apiRange));
+    if (widget.patient != null) {
+      context.read<DoctorBloc>().add(
+        DoctorVitalReportEvent(
+          range: period.apiRange,
+          patientId: widget.patient!.id,
+        ),
+      );
+    } else {
+      context.read<PatientBloc>().add(VitalReportEvent(range: period.apiRange));
+    }
   }
 
   List<Reading> _extractReadings(List<dynamic> vitalInfoList) {
@@ -142,12 +153,18 @@ class _HealthReportPageState extends State<HealthReportPage> {
       lastDate: now, // can't pick future date
     );
 
-    if (picked != null) {
-      if (context.mounted) {
-        context.read<PatientBloc>().add(
-          VitalReportEvent(
-            date: '${picked.year}-${picked.month}-${picked.day}',
+    if (picked != null && context.mounted) {
+      if (widget.patient != null) {
+        context.read<DoctorBloc>().add(
+          DoctorVitalReportEvent(
+            date: picked,
+            range: _period.value.apiRange,
+            patientId: widget.patient!.id,
           ),
+        );
+      } else {
+        context.read<PatientBloc>().add(
+          VitalReportEvent(date: picked, range: _period.value.apiRange),
         );
       }
     }
@@ -183,39 +200,73 @@ class _HealthReportPageState extends State<HealthReportPage> {
                 _fetchReport(p);
               },
             ),
-            BlocBuilder<PatientBloc, PatientState>(
-              // Rebuild on any list state change
-              buildWhen: (_, current) =>
-                  current is VitalInfoListLoading ||
-                  current is VitalInfoListLoaded,
-              builder: (context, state) {
-                if (state is VitalInfoListLoading) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      top: getIt<SizeConfig>().blockHight * 35,
-                    ),
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                if (state is VitalInfoListLoaded) {
-                  final readings = _extractReadings(state.vitalInfoList);
-                  return _ReportBody(
-                    config: widget.config,
-                    readings: readings,
-                    period: _period,
-                  );
-                }
-
-                return const SizedBox.shrink();
-              },
-            ),
+            _blocBuild(),
           ],
         ),
       ),
     );
   }
+
+  Widget _blocBuild() {
+    if (widget.patient != null) {
+      return BlocBuilder<DoctorBloc, DoctorState>(
+        buildWhen: (_, current) =>
+            current is DoctorVitalInfoListLoading ||
+            current is DoctorVitalInfoListLoaded,
+        builder: (context, state) {
+          if (state is DoctorVitalInfoListLoading) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: getIt<SizeConfig>().blockHight * 35,
+              ),
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (state is DoctorVitalInfoListLoaded) {
+            final readings = _extractReadings(state.vitalInfoList);
+            readings.sort((a, b) => b.date.compareTo(a.date));
+            return _ReportBody(
+              config: widget.config,
+              readings: readings,
+              period: _period,
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
+      );
+    } else {
+      return BlocBuilder<PatientBloc, PatientState>(
+        buildWhen: (_, current) =>
+            current is VitalInfoListLoading || current is VitalInfoListLoaded,
+        builder: (context, state) {
+          if (state is VitalInfoListLoading) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: getIt<SizeConfig>().blockHight * 35,
+              ),
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (state is VitalInfoListLoaded) {
+            final readings = _extractReadings(state.vitalInfoList);
+            readings.sort((a, b) => b.date.compareTo(a.date));
+            return _ReportBody(
+              config: widget.config,
+              readings: readings,
+              period: _period,
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
+      );
+    }
+  }
 }
+
 // ─── Report Body ───────────────────────────────────────────────────────────
 
 class _ReportBody extends StatelessWidget {
@@ -323,6 +374,9 @@ class _ReportBody extends StatelessWidget {
       'Nov',
       'Dec',
     ];
+    if (period.value == ReportPeriod.day) {
+      return '${d.hour.toString().padLeft(2, '0')}h';
+    }
     return '${d.day} ${months[d.month - 1]} ${d.year}';
   }
 
@@ -355,6 +409,7 @@ class _ReportBody extends StatelessWidget {
                 readings: readings,
                 period: period.value,
                 isBloodPressure: config.name == 'Blood Pressure',
+                isDay: period.value == ReportPeriod.day,
               ),
               size: Size.infinite,
             ),

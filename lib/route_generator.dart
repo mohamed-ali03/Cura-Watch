@@ -5,6 +5,8 @@ import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/features/auth/bloc/auth_bloc_bloc.dart';
 import 'package:cura_watch/features/auth/presentation/auth_route.dart';
 import 'package:cura_watch/features/auth/presentation/on_boarding.dart';
+import 'package:cura_watch/features/user/doctor/bloc/doctor_bloc.dart';
+import 'package:cura_watch/features/user/doctor/presentation/doctor_home.dart';
 import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
 import 'package:cura_watch/features/user/patient/presentation/patient_route.dart';
 import 'package:dio/dio.dart';
@@ -30,7 +32,12 @@ class RouteGenerator {
               key: APIKeys.role,
             );
             if (role == 'doctor') {
-              return MaterialPageRoute(builder: (_) => const Scaffold());
+              return MaterialPageRoute(
+                builder: (_) => BlocProvider<DoctorBloc>(
+                  create: (context) => DoctorBloc(dioConsumer: dioConsumer),
+                  child: const DoctorHome(),
+                ),
+              );
             } else if (role == 'patient') {
               return MaterialPageRoute(
                 builder: (_) => BlocProvider<PatientBloc>(
@@ -60,7 +67,12 @@ class RouteGenerator {
       case '/user':
         final String? role = getIt<CacheHelper>().getData(key: APIKeys.role);
         if (role == 'doctor') {
-          return MaterialPageRoute(builder: (_) => const Scaffold());
+          return MaterialPageRoute(
+            builder: (_) => BlocProvider<DoctorBloc>(
+              create: (context) => DoctorBloc(dioConsumer: dioConsumer),
+              child: const DoctorHome(),
+            ),
+          );
         } else if (role == 'patient') {
           return MaterialPageRoute(
             builder: (_) => BlocProvider<PatientBloc>(
