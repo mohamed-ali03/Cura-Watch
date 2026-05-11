@@ -39,3 +39,13 @@ final class DoctorVitalReportEvent extends DoctorEvent {
     this.date,
   });
 }
+
+final class MarkNotificationReadEvent extends DoctorEvent {
+  final String id;
+  MarkNotificationReadEvent({required this.id});
+}
+
+final class GetPatientByIdEvent extends DoctorEvent {
+  final String patientId;
+  GetPatientByIdEvent({required this.patientId});
+}

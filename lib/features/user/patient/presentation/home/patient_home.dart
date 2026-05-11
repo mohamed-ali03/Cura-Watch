@@ -1,4 +1,5 @@
 import 'package:cura_watch/core/api/dio_consumer.dart';
+import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/core/size_config.dart';
 import 'package:cura_watch/features/user/doctor/bloc/doctor_bloc.dart';
@@ -105,25 +106,27 @@ class _PatientHomeState extends State<PatientHome> {
             currentIndex = index;
           });
         },
+        selectedItemColor: Color(mainColor),
+        unselectedItemColor: Colors.grey,
         items: [
           BottomNavigationBarItem(
-            activeIcon: Icon(Icons.home, color: Colors.blue),
-            icon: Icon(Icons.home, color: Colors.black),
+            activeIcon: Icon(Icons.home, color: Color(mainColor)),
+            icon: Icon(Icons.home, color: Colors.grey),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            activeIcon: Icon(Icons.bar_chart, color: Colors.blue),
-            icon: Icon(Icons.bar_chart, color: Colors.black),
+            activeIcon: Icon(Icons.bar_chart, color: Color(mainColor)),
+            icon: Icon(Icons.bar_chart, color: Colors.grey),
             label: 'Report',
           ),
           BottomNavigationBarItem(
-            activeIcon: Icon(Icons.call, color: Colors.blue),
-            icon: Icon(Icons.call, color: Colors.black),
+            activeIcon: Icon(Icons.call, color: Color(mainColor)),
+            icon: Icon(Icons.call, color: Colors.grey),
             label: 'Emergency',
           ),
           BottomNavigationBarItem(
-            activeIcon: Icon(Icons.person, color: Colors.blue),
-            icon: Icon(Icons.person, color: Colors.black),
+            activeIcon: Icon(Icons.person, color: Color(mainColor)),
+            icon: Icon(Icons.person, color: Colors.grey),
             label: 'Profile',
           ),
         ],

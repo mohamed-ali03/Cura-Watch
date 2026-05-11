@@ -21,6 +21,8 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     on<EditDoctorEvent>(_editDoctorInfo);
     on<GetAssignedPatient>(_getAssignedPatient);
     on<DoctorVitalReportEvent>(_getVitalInfo);
+    on<MarkNotificationReadEvent>(_markNotificationRead);
+    on<GetPatientByIdEvent>(_getPatientById);
   }
 
   Future<void> _getDoctors(
@@ -174,6 +176,50 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
           .map((e) => VitalInfo.fromJson(e as Map<String, dynamic>))
           .toList();
       emit(DoctorVitalInfoListLoaded(vitalInfoList: vitalInfoList));
+    } on ServerException catch (e) {
+      emit(DoctorError(message: e.errorModel.message));
+    } catch (e) {
+      emit(DoctorError(message: e.toString()));
+    }
+  }
+
+  Future<void> _markNotificationRead(
+    MarkNotificationReadEvent event,
+    Emitter<DoctorState> emit,
+  ) async {
+    try {
+      emit(MarkNotificationReadLoading());
+      await dioConsumer.patch('${EndPoints.doctorsNotifications}/${event.id}');
+      emit(MarkNotificationReadLoaded());
+    } on ServerException catch (e) {
+      emit(DoctorError(message: e.errorModel.message));
+    } catch (e) {
+      emit(DoctorError(message: e.toString()));
+    }
+  }
+
+  Future<void> _getPatientById(
+    GetPatientByIdEvent event,
+    Emitter<DoctorState> emit,
+  ) async {
+    try {
+      emit(GetPatientByIdLoading());
+      final response = await dioConsumer.get(
+        '${EndPoints.getAssignedPatient}/${event.patientId}',
+      );
+      final patientData = response['patient'];
+      if (patientData == null) {
+        throw Exception('Patient data not found in server response');
+      }
+      final patient = Patient.fromJson(patientData);
+      final List<VitalInfo> vitalsHistory =
+          (response['vitalsHistory'] as List<dynamic>?)
+              ?.map((e) => VitalInfo.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+      emit(
+        GetPatientByIdLoaded(patient: patient, vitalsHistory: vitalsHistory),
+      );
     } on ServerException catch (e) {
       emit(DoctorError(message: e.errorModel.message));
     } catch (e) {

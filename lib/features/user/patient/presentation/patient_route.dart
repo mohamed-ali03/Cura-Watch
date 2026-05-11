@@ -1,3 +1,4 @@
+import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/database/cache/cache_helper.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
 import 'package:cura_watch/features/user/patient/bloc/patient_bloc.dart';
@@ -43,7 +44,7 @@ class _PatientRouteState extends State<PatientRoute> {
               actions: [
                 IconButton(
                   onPressed: () {
-                    getIt<CacheHelper>().clearData();
+                    getIt<CacheHelper>().removeData(key: APIKeys.token);
                     Navigator.pushNamed(context, '/');
                   },
                   icon: const Icon(Icons.logout),

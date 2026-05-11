@@ -51,3 +51,15 @@ final class DoctorVitalInfoListLoaded extends DoctorState {
   final List<dynamic> vitalInfoList;
   DoctorVitalInfoListLoaded({required this.vitalInfoList});
 }
+
+final class MarkNotificationReadLoading extends DoctorState {}
+
+final class MarkNotificationReadLoaded extends DoctorState {}
+
+final class GetPatientByIdLoading extends DoctorState {}
+
+final class GetPatientByIdLoaded extends DoctorState {
+  final Patient patient;
+  final List<VitalInfo> vitalsHistory;
+  GetPatientByIdLoaded({required this.patient, required this.vitalsHistory});
+}

@@ -16,6 +16,7 @@ class EndPoints {
 
   static const String vitalReports = 'patients/vitals-averages';
   static const String specificDateReport = 'patients/vitals-date-filter';
+  static const String doctorsNotifications = 'doctors/notifications';
 }
 
 class APIKeys {

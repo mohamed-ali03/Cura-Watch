@@ -1,3 +1,4 @@
+import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/database/cache/cache_helper.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
@@ -28,7 +29,7 @@ class PatientProfile extends StatelessWidget {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {
                   if (value == 'logout') {
-                    getIt<CacheHelper>().clearData();
+                    getIt<CacheHelper>().removeData(key: APIKeys.token);
                     Navigator.pushNamed(context, '/');
                   } else if (value == 'edit') {
                     Navigator.push(
@@ -161,8 +162,7 @@ class PatientProfile extends StatelessWidget {
             fieldData: patient.emergencyContact.isNotEmpty
                 ? patient.emergencyContact
                       .map(
-                        (contact) =>
-                            '${contact.keys.first}: ${contact.values.first}',
+                        (contact) => '${contact['name']}: ${contact['number']}',
                       )
                       .join('\n')
                 : '',

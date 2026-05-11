@@ -188,7 +188,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
       } else {
         if (event.range == 'week') {
           response = await dioConsumer.get(
-            EndPoints.specificDateReport,
+            EndPoints.vitalReports,
             queryParameters: {
               'week_start': () {
                 final d = event.date!;
@@ -199,7 +199,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
           );
         } else if (event.range == 'month') {
           response = await dioConsumer.get(
-            EndPoints.specificDateReport,
+            EndPoints.vitalReports,
             queryParameters: {
               'month': event.date!.month,
               'year': event.date!.year,
@@ -207,7 +207,7 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
           );
         } else {
           response = await dioConsumer.get(
-            EndPoints.specificDateReport,
+            EndPoints.vitalReports,
             queryParameters: {
               'date':
                   '${event.date!.year}-${event.date!.month}-${event.date!.day}',

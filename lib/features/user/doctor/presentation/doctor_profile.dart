@@ -1,3 +1,4 @@
+import 'package:cura_watch/core/api/end_points.dart';
 import 'package:cura_watch/core/constants.dart';
 import 'package:cura_watch/core/database/cache/cache_helper.dart';
 import 'package:cura_watch/core/services/service_locator.dart';
@@ -57,7 +58,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                   icon: const Icon(Icons.more_vert),
                   onSelected: (value) {
                     if (value == 'logout') {
-                      getIt<CacheHelper>().clearData();
+                      getIt<CacheHelper>().removeData(key: APIKeys.token);
                       Navigator.pushNamed(context, '/');
                     } else if (value == 'edit') {
                       showEditsheet(context);

@@ -58,14 +58,32 @@ class _HealthReportPageState extends State<HealthReportPage> {
 
   void _fetchReport(ReportPeriod period) {
     if (widget.patient != null) {
-      context.read<DoctorBloc>().add(
-        DoctorVitalReportEvent(
-          range: period.apiRange,
-          patientId: widget.patient!.id,
-        ),
-      );
+      if (period == ReportPeriod.day) {
+        context.read<DoctorBloc>().add(
+          DoctorVitalReportEvent(
+            date: DateTime.now(),
+            range: _period.value.apiRange,
+            patientId: widget.patient!.id,
+          ),
+        );
+      } else {
+        context.read<DoctorBloc>().add(
+          DoctorVitalReportEvent(
+            range: period.apiRange,
+            patientId: widget.patient!.id,
+          ),
+        );
+      }
     } else {
-      context.read<PatientBloc>().add(VitalReportEvent(range: period.apiRange));
+      if (period == ReportPeriod.day) {
+        context.read<PatientBloc>().add(
+          VitalReportEvent(date: DateTime.now(), range: _period.value.apiRange),
+        );
+      } else {
+        context.read<PatientBloc>().add(
+          VitalReportEvent(range: period.apiRange),
+        );
+      }
     }
   }
 
