@@ -610,6 +610,7 @@ class _ReportBody extends StatelessWidget {
         reading.date.year,
         reading.date.month,
         reading.date.day,
+        reading.date.hour,
       );
       if (!groupedReadings.containsKey(date)) {
         groupedReadings[date] = {};

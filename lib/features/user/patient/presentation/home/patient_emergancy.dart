@@ -69,10 +69,11 @@ class _PatientEmergancyState extends State<PatientEmergancy> {
             itemBuilder: (context, index) {
               return RowCard(
                 icon: Icons.person,
-                vitalName: widget.patient.emergencyContact[index]['name'],
-                phoneNumber: widget.patient.emergencyContact[index]['number'],
+                vitalName: widget.patient.emergencyContact[index].keys.first,
+                phoneNumber:
+                    widget.patient.emergencyContact[index].values.first,
                 onShowReport: () => makePhoneCall(
-                  widget.patient.emergencyContact[index]['number'],
+                  widget.patient.emergencyContact[index].values.first,
                 ),
               );
             },

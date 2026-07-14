@@ -90,23 +90,28 @@ class _PatientDashboardState extends State<PatientDashboard> {
                 healthData[5]['data'] = '${state.vitalInfo.glucose} mg/dL';
               }
 
-              return GridView.builder(
-                itemCount: 6,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: getIt<SizeConfig>().blockHight * 3,
-                  mainAxisSpacing: getIt<SizeConfig>().blockHight * 3,
-                  childAspectRatio: 4 / 3,
-                ),
-                itemBuilder: (context, index) {
-                  return VitalBox(
-                    vitalName: healthData[index]['name']!,
-                    vitalIcon: healthData[index]['icon']!,
-                    vitalData: healthData[index]['data']!,
-                  );
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<PatientBloc>().add(GetVitalInfoEvent());
                 },
+                child: GridView.builder(
+                  itemCount: 6,
+                  shrinkWrap: true,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: getIt<SizeConfig>().blockHight * 3,
+                    mainAxisSpacing: getIt<SizeConfig>().blockHight * 3,
+                    childAspectRatio: 4 / 3,
+                  ),
+                  itemBuilder: (context, index) {
+                    return VitalBox(
+                      vitalName: healthData[index]['name']!,
+                      vitalIcon: healthData[index]['icon']!,
+                      vitalData: healthData[index]['data']!,
+                    );
+                  },
+                ),
               );
             },
           ),

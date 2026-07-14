@@ -117,8 +117,8 @@ class _UserOnBoardingState extends State<UserOnBoarding> {
       _medicationControllers.value.add(TextEditingController(text: medication));
       final parts = widget.patient!.medications[medication]!.split(":");
       final time = TimeOfDay(
-        hour: int.parse(parts[0]),
-        minute: int.parse(parts[1]),
+        hour: int.tryParse(parts[0] ?? '0') ?? 0,
+        minute: parts.length > 1 ? int.tryParse(parts[1] ?? '0') ?? 0 : 0,
       );
       _dosageTimes.value.add(time);
     }
